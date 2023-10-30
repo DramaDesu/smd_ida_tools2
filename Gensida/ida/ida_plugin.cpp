@@ -29,13 +29,22 @@
 
 #include "ida_debmod.h"
 #include "ida_registers.h"
+
 #include <mutex>
+
+#ifdef SUPPORT_VISUALIZATION
+#include "ida_gens_helper_window.h"
+#endif
 
 extern debugger_t debugger;
 
 static bool plugin_inited;
 static bool dbg_started;
 static bool my_dbg;
+
+#ifdef SUPPORT_VISUALIZATION
+static ida_gens_helper_window helper_window;
+#endif
 
 #ifdef DEBUG_68K
 static ssize_t idaapi hook_dbg(void* user_data, int notification_code, va_list va)
@@ -2021,7 +2030,7 @@ static plugmod_t* idaapi init(void)
   {
     plugin_inited = true;
     dbg_started = false;
-    my_dbg = false;
+    my_dbg = true;
 
 #ifdef DEBUG_68K
     bool res = register_action(smd_constant_action);
@@ -2032,6 +2041,10 @@ static plugmod_t* idaapi init(void)
     hook_to_notification_point(HT_IDP, process_asm_output, nullptr);
     register_post_event_visitor(HT_IDP, &ctx, nullptr);
     hook_to_notification_point(HT_DBG, hook_dbg, NULL);
+
+#ifdef SUPPORT_VISUALIZATION
+    helper_window.init();
+#endif
 #endif
 
     print_version();
@@ -2049,6 +2062,10 @@ static void idaapi term(void)
   if (plugin_inited)
   {
 #ifdef DEBUG_68K
+
+#ifdef SUPPORT_VISUALIZATION
+    helper_window.shutdown();
+#endif
     unhook_from_notification_point(HT_UI, hook_ui);
     unregister_post_event_visitor(HT_IDP, &ctx);
     unhook_from_notification_point(HT_IDP, process_asm_output);

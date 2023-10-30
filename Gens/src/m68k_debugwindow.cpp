@@ -45,6 +45,9 @@ void M68kDebugWindow::TracePC(int pc)
 
     if (br)
     {
+        // Record current pc to call stack
+        callstack.push_back(last_pc);
+
         StepInto = false;
         StepOver = -1;
         Breakpoint(last_pc);

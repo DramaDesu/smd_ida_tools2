@@ -7,6 +7,12 @@
     <Filter Include="proto">
       <UniqueIdentifier>{a7a8f7f9-e64e-42c5-aa74-d6aede27961f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="config">
+      <UniqueIdentifier>{d2f51fcc-de33-493a-b9c2-ff72cff32b3d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="data">
+      <UniqueIdentifier>{687376ae-e8f0-4827-91ce-074ffe35b3c2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ida\ida_debug.cpp">
@@ -26,6 +32,9 @@
     </ClCompile>
     <ClCompile Include="..\proto\debug_proto_z80.pb.cc">
       <Filter>proto</Filter>
+    </ClCompile>
+    <ClCompile Include="ida\ida_gens_helper_window.cpp">
+      <Filter>ida</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -53,5 +62,20 @@
     <ClInclude Include="..\proto\debug_proto_z80.pb.h">
       <Filter>proto</Filter>
     </ClInclude>
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="ida\ida_gens_helper_window.h">
+      <Filter>ida</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="gensida.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <CopyFileToFolders Include="mnemonics.toml">
+      <Filter>data</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="style.toml">
+      <Filter>config</Filter>
+    </CopyFileToFolders>
   </ItemGroup>
 </Project>

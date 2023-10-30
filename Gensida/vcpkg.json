@@ -1,6 +1,11 @@
 {
   "dependencies": [
-    "grpc"
+    "grpc",
+    "sdl2",
+    {
+      "name": "imgui",
+      "features": [ "sdl2-binding", "sdl2-renderer-binding" ]
+    }
   ],
   "builtin-baseline": "288e8bebf4ca67c1f8ebd49366b03650cfd9eb7d"
 }

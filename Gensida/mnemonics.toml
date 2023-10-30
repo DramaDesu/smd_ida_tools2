@@ -1,0 +1,10 @@
+[unknown]
+name = "Unsupported instruction"
+
+[move]
+name = "The MOVE Instruction"
+short_description = "MOVE – copy data from source to destination"
+long_description = '''
+You’ve seen this instruction used multiple times by now in the previous parts, so let’s look at it in more detail.
+This instruction will copy the number from the source operand and move it to the destination operand, the source operand will remain unchanged.
+'''

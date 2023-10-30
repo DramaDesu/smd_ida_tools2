@@ -37,4 +37,6 @@ Debug_68k/
 Release_68k/
 Debug_z80/
 Release_z80/
+Gens/vcpkg_installed/
 Gensida/vcpkg_installed/
+.vs/

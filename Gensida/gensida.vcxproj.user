@@ -5,7 +5,17 @@
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
     <LocalDebuggerWorkingDirectory>c:\Program Files\IDA Pro 8.0\</LocalDebuggerWorkingDirectory>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug8_68k|Win32'">
+    <LocalDebuggerCommand>c:\Program Files\IDA Pro 8.0\ida.exe</LocalDebuggerCommand>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+    <LocalDebuggerWorkingDirectory>c:\Program Files\IDA Pro 8.0\</LocalDebuggerWorkingDirectory>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug8_z80|x64'">
+    <LocalDebuggerCommand>c:\Program Files\IDA Pro 8.0\ida.exe</LocalDebuggerCommand>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+    <LocalDebuggerWorkingDirectory>c:\Program Files\IDA Pro 8.0\</LocalDebuggerWorkingDirectory>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug8_z80|Win32'">
     <LocalDebuggerCommand>c:\Program Files\IDA Pro 8.0\ida.exe</LocalDebuggerCommand>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
     <LocalDebuggerWorkingDirectory>c:\Program Files\IDA Pro 8.0\</LocalDebuggerWorkingDirectory>
@@ -15,7 +25,17 @@
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
     <LocalDebuggerWorkingDirectory>c:\Program Files\IDA Pro 8.0\</LocalDebuggerWorkingDirectory>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release8_68k|Win32'">
+    <LocalDebuggerCommand>c:\Program Files\IDA Pro 8.0\ida.exe</LocalDebuggerCommand>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+    <LocalDebuggerWorkingDirectory>c:\Program Files\IDA Pro 8.0\</LocalDebuggerWorkingDirectory>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release8_z80|x64'">
+    <LocalDebuggerCommand>c:\Program Files\IDA Pro 8.0\ida.exe</LocalDebuggerCommand>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+    <LocalDebuggerWorkingDirectory>c:\Program Files\IDA Pro 8.0\</LocalDebuggerWorkingDirectory>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release8_z80|Win32'">
     <LocalDebuggerCommand>c:\Program Files\IDA Pro 8.0\ida.exe</LocalDebuggerCommand>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
     <LocalDebuggerWorkingDirectory>c:\Program Files\IDA Pro 8.0\</LocalDebuggerWorkingDirectory>
@@ -25,7 +45,17 @@
     <LocalDebuggerWorkingDirectory>$(IDA_DIR)</LocalDebuggerWorkingDirectory>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug80_68k|Win32'">
+    <LocalDebuggerCommand>$(IDA_DIR)\ida.exe</LocalDebuggerCommand>
+    <LocalDebuggerWorkingDirectory>$(IDA_DIR)</LocalDebuggerWorkingDirectory>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug80_z80|x64'">
+    <LocalDebuggerWorkingDirectory>$(IDA_DIR)</LocalDebuggerWorkingDirectory>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+    <LocalDebuggerCommand>$(IDA_DIR)\ida.exe</LocalDebuggerCommand>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug80_z80|Win32'">
     <LocalDebuggerWorkingDirectory>$(IDA_DIR)</LocalDebuggerWorkingDirectory>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
     <LocalDebuggerCommand>$(IDA_DIR)\ida.exe</LocalDebuggerCommand>
