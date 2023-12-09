@@ -154,6 +154,7 @@ message DbgBreakpoint {
   bool enabled = 4;
   bool is_vdp = 5;
   bool is_forbid = 6;
+  string condition = 7;
 }
 
 message DbgBreakpoints {

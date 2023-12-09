@@ -1184,6 +1184,12 @@ static drc_t idaapi update_bpts(int* nbpts, update_bpt_info_t *bpts, int nadd, i
 #endif
     bp.set_is_forbid(false);
 
+    bpt_t bpt;
+    if (get_bpt(start, &bpt) && !bpt.cndbody.empty())
+    {
+    	bp.set_condition(bpt.cndbody.c_str());
+    }
+
     if (client && !client->add_breakpoint(bp)) {
       return DRC_FAILED;
     }
@@ -1309,6 +1315,12 @@ static drc_t idaapi update_lowcnds(int* nupdated, const lowcnd_t *lowcnds, int n
     bp.set_is_vdp(is_vdp);
 #endif
     bp.set_is_forbid(lowcnds[i].cndbody.empty() ? false : ((lowcnds[i].cndbody[0] == '1') ? true : false));
+
+    bpt_t bpt;
+    if (get_bpt(start, &bpt))
+    {
+        bp.set_condition(bpt.cndbody.c_str());
+    }
 
     if (client && !client->update_breakpoint(bp)) {
       return DRC_FAILED;

@@ -16,6 +16,48 @@ void Handle_Gens_Messages();
 extern int Gens_Running;
 extern "C" int Clear_Sound_Buffer(void);
 
+bool BreakpointCondition::check_condition() const
+{
+    if (!is_compiled)
+    {
+	    return false;
+    }
+
+    return true;
+}
+
+bool Breakpoint::check_condition() const
+{
+    return breakpoint_condition.check_condition();
+}
+
+#include "shunting-yard.h"
+
+void Breakpoint::try_to_compile_condition(const std::string& in_condition)
+{
+	if (in_condition.empty())
+	{
+		return;
+	}
+
+    breakpoint_condition.is_compiled = false;
+
+	cparse::TokenMap vars;
+    vars["pi"] = 3.14;
+	try
+	{
+        const auto token_value = cparse::calculator::calculate("7+1", &vars);
+        if (token_value.asDouble())
+        {
+
+        }
+	}
+	catch (...)
+	{
+        std::cout << "WTF" << std::endl;
+	}
+}
+
 DebugWindow::DebugWindow()
 {
     DebugStop = false;
@@ -58,7 +100,7 @@ void DebugWindow::Breakpoint(int pc)
     }
 }
 
-bool DebugWindow::BreakPC(int pc)
+bool DebugWindow::BreakPC(int pc) const
 {
     for (auto i = Breakpoints.cbegin(); i != Breakpoints.cend(); ++i)
     {
@@ -67,6 +109,10 @@ bool DebugWindow::BreakPC(int pc)
 
         if (pc <= (int)(i->end) && pc >= (int)(i->start))
         {
+			if (!i->check_condition())
+			{
+				return false;
+			}
             return !(i->is_forbid);
         }
     }

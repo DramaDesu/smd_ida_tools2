@@ -187,7 +187,8 @@ struct MemoryADDefaultTypeInternal {
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 MemoryADDefaultTypeInternal _MemoryAD_default_instance_;
 PROTOBUF_CONSTEXPR DbgBreakpoint::DbgBreakpoint(
     ::_pbi::ConstantInitialized): _impl_{
-    /*decltype(_impl_.type_)*/0
+    /*decltype(_impl_.condition_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.type_)*/0
   , /*decltype(_impl_.bstart_)*/0u
   , /*decltype(_impl_.bend_)*/0u
   , /*decltype(_impl_.enabled_)*/false
@@ -433,6 +434,7 @@ const uint32_t TableStruct_debug_5fproto_5f68k_2eproto::offsets[] PROTOBUF_SECTI
   PROTOBUF_FIELD_OFFSET(::idadebug::DbgBreakpoint, _impl_.enabled_),
   PROTOBUF_FIELD_OFFSET(::idadebug::DbgBreakpoint, _impl_.is_vdp_),
   PROTOBUF_FIELD_OFFSET(::idadebug::DbgBreakpoint, _impl_.is_forbid_),
+  PROTOBUF_FIELD_OFFSET(::idadebug::DbgBreakpoint, _impl_.condition_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::idadebug::DbgBreakpoints, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -508,14 +510,14 @@ static const ::_pbi::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protode
   { 94, -1, -1, sizeof(::idadebug::MemoryAS)},
   { 102, -1, -1, sizeof(::idadebug::MemoryAD)},
   { 110, -1, -1, sizeof(::idadebug::DbgBreakpoint)},
-  { 122, -1, -1, sizeof(::idadebug::DbgBreakpoints)},
-  { 129, -1, -1, sizeof(::idadebug::Callstack)},
-  { 136, -1, -1, sizeof(::idadebug::AnyRegValue)},
-  { 143, -1, -1, sizeof(::idadebug::MemData)},
-  { 150, 158, -1, sizeof(::idadebug::PauseChanged_ChangedEntry_DoNotUse)},
-  { 160, -1, -1, sizeof(::idadebug::PauseChanged)},
-  { 168, 176, -1, sizeof(::idadebug::Changed_ChangedEntry_DoNotUse)},
-  { 178, -1, -1, sizeof(::idadebug::Changed)},
+  { 123, -1, -1, sizeof(::idadebug::DbgBreakpoints)},
+  { 130, -1, -1, sizeof(::idadebug::Callstack)},
+  { 137, -1, -1, sizeof(::idadebug::AnyRegValue)},
+  { 144, -1, -1, sizeof(::idadebug::MemData)},
+  { 151, 159, -1, sizeof(::idadebug::PauseChanged_ChangedEntry_DoNotUse)},
+  { 161, -1, -1, sizeof(::idadebug::PauseChanged)},
+  { 169, 177, -1, sizeof(::idadebug::Changed_ChangedEntry_DoNotUse)},
+  { 179, -1, -1, sizeof(::idadebug::Changed)},
 };
 
 static const ::_pb::Message* const file_default_instances[] = {
@@ -564,79 +566,80 @@ const char descriptor_table_protodef_debug_5fproto_5f68k_2eproto[] PROTOBUF_SECT
   "lue\030\002 \001(\r\"0\n\007DmaInfo\022\013\n\003len\030\001 \001(\r\022\013\n\003src"
   "\030\002 \001(\r\022\013\n\003dst\030\003 \001(\r\")\n\010MemoryAS\022\017\n\007addre"
   "ss\030\001 \001(\r\022\014\n\004size\030\002 \001(\r\")\n\010MemoryAD\022\017\n\007ad"
-  "dress\030\001 \001(\r\022\014\n\004data\030\002 \001(\014\"\201\001\n\rDbgBreakpo"
+  "dress\030\001 \001(\r\022\014\n\004data\030\002 \001(\014\"\224\001\n\rDbgBreakpo"
   "int\022\036\n\004type\030\001 \001(\0162\020.idadebug.BpType\022\016\n\006b"
   "start\030\002 \001(\r\022\014\n\004bend\030\003 \001(\r\022\017\n\007enabled\030\004 \001"
-  "(\010\022\016\n\006is_vdp\030\005 \001(\010\022\021\n\tis_forbid\030\006 \001(\010\"7\n"
-  "\016DbgBreakpoints\022%\n\004list\030\001 \003(\0132\027.idadebug"
-  ".DbgBreakpoint\"\036\n\tCallstack\022\021\n\tcallstack"
-  "\030\001 \003(\r\"\034\n\013AnyRegValue\022\r\n\005value\030\001 \001(\r\"\027\n\007"
-  "MemData\022\014\n\004data\030\001 \001(\014\"\205\001\n\014PauseChanged\022\017"
-  "\n\007address\030\001 \001(\r\0224\n\007changed\030\002 \003(\0132#.idade"
-  "bug.PauseChanged.ChangedEntry\032.\n\014Changed"
-  "Entry\022\013\n\003key\030\001 \001(\r\022\r\n\005value\030\002 \001(\r:\0028\001\"j\n"
-  "\007Changed\022/\n\007changed\030\001 \003(\0132\036.idadebug.Cha"
-  "nged.ChangedEntry\032.\n\014ChangedEntry\022\013\n\003key"
-  "\030\001 \001(\r\022\r\n\005value\030\002 \001(\r:\0028\001*\244\001\n\nGpRegsEnum"
-  "\022\006\n\002D0\020\000\022\006\n\002D1\020\001\022\006\n\002D2\020\002\022\006\n\002D3\020\003\022\006\n\002D4\020\004"
-  "\022\006\n\002D5\020\005\022\006\n\002D6\020\006\022\006\n\002D7\020\007\022\006\n\002A0\020\010\022\006\n\002A1\020\n"
-  "\022\006\n\002A2\020\014\022\006\n\002A3\020\016\022\006\n\002A4\020\020\022\006\n\002A5\020\022\022\006\n\002A6\020\024"
-  "\022\006\n\002A7\020\026\022\006\n\002PC\020\030\022\006\n\002SP\020\032\022\006\n\002SR\020\034*\345\001\n\013Vdp"
-  "RegsEnum\022\007\n\003V00\020\000\022\007\n\003V01\020\001\022\007\n\003V02\020\002\022\007\n\003V"
-  "03\020\003\022\007\n\003V04\020\004\022\007\n\003V05\020\005\022\007\n\003V06\020\006\022\007\n\003V07\020\007"
-  "\022\007\n\003V08\020\010\022\007\n\003V09\020\t\022\007\n\003V0A\020\n\022\007\n\003V0B\020\013\022\007\n\003"
-  "V0C\020\014\022\007\n\003V0D\020\r\022\007\n\003V0E\020\016\022\007\n\003V0F\020\017\022\007\n\003V10\020"
-  "\020\022\007\n\003V11\020\021\022\007\n\003V12\020\022\022\007\n\003V13\020\023\022\007\n\003V14\020\024\022\007\n"
-  "\003V15\020\025\022\007\n\003V16\020\026\022\007\n\003V17\020\027*9\n\006BpType\022\t\n\005DU"
-  "MMY\020\000\022\t\n\005BP_PC\020\001\022\013\n\007BP_READ\020\002\022\014\n\010BP_WRIT"
-  "E\020\0032\214\013\n\tDbgServer\0226\n\nget_gp_reg\022\017.idadeb"
-  "ug.GpReg\032\025.idadebug.AnyRegValue\"\000\0229\n\013get"
-  "_gp_regs\022\026.google.protobuf.Empty\032\020.idade"
-  "bug.GpRegs\"\000\022<\n\nset_gp_reg\022\024.idadebug.Gp"
-  "RegValue\032\026.google.protobuf.Empty\"\000\0228\n\013ge"
-  "t_vdp_reg\022\020.idadebug.VdpReg\032\025.idadebug.A"
-  "nyRegValue\"\000\022;\n\014get_vdp_regs\022\026.google.pr"
-  "otobuf.Empty\032\021.idadebug.VdpRegs\"\000\022>\n\013set"
-  "_vdp_reg\022\025.idadebug.VdpRegValue\032\026.google"
-  ".protobuf.Empty\"\000\022;\n\014get_dma_info\022\026.goog"
-  "le.protobuf.Empty\032\021.idadebug.DmaInfo\"\000\0226"
-  "\n\013read_memory\022\022.idadebug.MemoryAS\032\021.idad"
-  "ebug.MemData\"\000\022<\n\014write_memory\022\022.idadebu"
-  "g.MemoryAD\032\026.google.protobuf.Empty\"\000\022E\n\017"
-  "get_breakpoints\022\026.google.protobuf.Empty\032"
-  "\030.idadebug.DbgBreakpoints\"\000\022C\n\016add_break"
-  "point\022\027.idadebug.DbgBreakpoint\032\026.google."
-  "protobuf.Empty\"\000\022F\n\021toggle_breakpoint\022\027."
+  "(\010\022\016\n\006is_vdp\030\005 \001(\010\022\021\n\tis_forbid\030\006 \001(\010\022\021\n"
+  "\tcondition\030\007 \001(\t\"7\n\016DbgBreakpoints\022%\n\004li"
+  "st\030\001 \003(\0132\027.idadebug.DbgBreakpoint\"\036\n\tCal"
+  "lstack\022\021\n\tcallstack\030\001 \003(\r\"\034\n\013AnyRegValue"
+  "\022\r\n\005value\030\001 \001(\r\"\027\n\007MemData\022\014\n\004data\030\001 \001(\014"
+  "\"\205\001\n\014PauseChanged\022\017\n\007address\030\001 \001(\r\0224\n\007ch"
+  "anged\030\002 \003(\0132#.idadebug.PauseChanged.Chan"
+  "gedEntry\032.\n\014ChangedEntry\022\013\n\003key\030\001 \001(\r\022\r\n"
+  "\005value\030\002 \001(\r:\0028\001\"j\n\007Changed\022/\n\007changed\030\001"
+  " \003(\0132\036.idadebug.Changed.ChangedEntry\032.\n\014"
+  "ChangedEntry\022\013\n\003key\030\001 \001(\r\022\r\n\005value\030\002 \001(\r"
+  ":\0028\001*\244\001\n\nGpRegsEnum\022\006\n\002D0\020\000\022\006\n\002D1\020\001\022\006\n\002D"
+  "2\020\002\022\006\n\002D3\020\003\022\006\n\002D4\020\004\022\006\n\002D5\020\005\022\006\n\002D6\020\006\022\006\n\002D"
+  "7\020\007\022\006\n\002A0\020\010\022\006\n\002A1\020\n\022\006\n\002A2\020\014\022\006\n\002A3\020\016\022\006\n\002A"
+  "4\020\020\022\006\n\002A5\020\022\022\006\n\002A6\020\024\022\006\n\002A7\020\026\022\006\n\002PC\020\030\022\006\n\002S"
+  "P\020\032\022\006\n\002SR\020\034*\345\001\n\013VdpRegsEnum\022\007\n\003V00\020\000\022\007\n\003"
+  "V01\020\001\022\007\n\003V02\020\002\022\007\n\003V03\020\003\022\007\n\003V04\020\004\022\007\n\003V05\020"
+  "\005\022\007\n\003V06\020\006\022\007\n\003V07\020\007\022\007\n\003V08\020\010\022\007\n\003V09\020\t\022\007\n"
+  "\003V0A\020\n\022\007\n\003V0B\020\013\022\007\n\003V0C\020\014\022\007\n\003V0D\020\r\022\007\n\003V0E"
+  "\020\016\022\007\n\003V0F\020\017\022\007\n\003V10\020\020\022\007\n\003V11\020\021\022\007\n\003V12\020\022\022\007"
+  "\n\003V13\020\023\022\007\n\003V14\020\024\022\007\n\003V15\020\025\022\007\n\003V16\020\026\022\007\n\003V1"
+  "7\020\027*9\n\006BpType\022\t\n\005DUMMY\020\000\022\t\n\005BP_PC\020\001\022\013\n\007B"
+  "P_READ\020\002\022\014\n\010BP_WRITE\020\0032\214\013\n\tDbgServer\0226\n\n"
+  "get_gp_reg\022\017.idadebug.GpReg\032\025.idadebug.A"
+  "nyRegValue\"\000\0229\n\013get_gp_regs\022\026.google.pro"
+  "tobuf.Empty\032\020.idadebug.GpRegs\"\000\022<\n\nset_g"
+  "p_reg\022\024.idadebug.GpRegValue\032\026.google.pro"
+  "tobuf.Empty\"\000\0228\n\013get_vdp_reg\022\020.idadebug."
+  "VdpReg\032\025.idadebug.AnyRegValue\"\000\022;\n\014get_v"
+  "dp_regs\022\026.google.protobuf.Empty\032\021.idadeb"
+  "ug.VdpRegs\"\000\022>\n\013set_vdp_reg\022\025.idadebug.V"
+  "dpRegValue\032\026.google.protobuf.Empty\"\000\022;\n\014"
+  "get_dma_info\022\026.google.protobuf.Empty\032\021.i"
+  "dadebug.DmaInfo\"\000\0226\n\013read_memory\022\022.idade"
+  "bug.MemoryAS\032\021.idadebug.MemData\"\000\022<\n\014wri"
+  "te_memory\022\022.idadebug.MemoryAD\032\026.google.p"
+  "rotobuf.Empty\"\000\022E\n\017get_breakpoints\022\026.goo"
+  "gle.protobuf.Empty\032\030.idadebug.DbgBreakpo"
+  "ints\"\000\022C\n\016add_breakpoint\022\027.idadebug.DbgB"
+  "reakpoint\032\026.google.protobuf.Empty\"\000\022F\n\021t"
+  "oggle_breakpoint\022\027.idadebug.DbgBreakpoin"
+  "t\032\026.google.protobuf.Empty\"\000\022F\n\021update_br"
+  "eakpoint\022\027.idadebug.DbgBreakpoint\032\026.goog"
+  "le.protobuf.Empty\"\000\022C\n\016del_breakpoint\022\027."
   "idadebug.DbgBreakpoint\032\026.google.protobuf"
-  ".Empty\"\000\022F\n\021update_breakpoint\022\027.idadebug"
-  ".DbgBreakpoint\032\026.google.protobuf.Empty\"\000"
-  "\022C\n\016del_breakpoint\022\027.idadebug.DbgBreakpo"
-  "int\032\026.google.protobuf.Empty\"\000\022E\n\021clear_b"
-  "reakpoints\022\026.google.protobuf.Empty\032\026.goo"
-  "gle.protobuf.Empty\"\000\0229\n\005pause\022\026.google.p"
+  ".Empty\"\000\022E\n\021clear_breakpoints\022\026.google.p"
   "rotobuf.Empty\032\026.google.protobuf.Empty\"\000\022"
-  ":\n\006resume\022\026.google.protobuf.Empty\032\026.goog"
-  "le.protobuf.Empty\"\000\022C\n\017start_emulation\022\026"
-  ".google.protobuf.Empty\032\026.google.protobuf"
-  ".Empty\"\000\022B\n\016exit_emulation\022\026.google.prot"
-  "obuf.Empty\032\026.google.protobuf.Empty\"\000\022=\n\t"
-  "step_into\022\026.google.protobuf.Empty\032\026.goog"
-  "le.protobuf.Empty\"\000\022=\n\tstep_over\022\026.googl"
-  "e.protobuf.Empty\032\026.google.protobuf.Empty"
-  "\"\000\022>\n\rget_callstack\022\026.google.protobuf.Em"
-  "pty\032\023.idadebug.Callstack\"\0002\310\001\n\tDbgClient"
-  "\022\?\n\013start_event\022\026.google.protobuf.Empty\032"
-  "\026.google.protobuf.Empty\"\000\022\?\n\013pause_event"
-  "\022\026.idadebug.PauseChanged\032\026.google.protob"
-  "uf.Empty\"\000\0229\n\nstop_event\022\021.idadebug.Chan"
-  "ged\032\026.google.protobuf.Empty\"\000b\006proto3"
+  "9\n\005pause\022\026.google.protobuf.Empty\032\026.googl"
+  "e.protobuf.Empty\"\000\022:\n\006resume\022\026.google.pr"
+  "otobuf.Empty\032\026.google.protobuf.Empty\"\000\022C"
+  "\n\017start_emulation\022\026.google.protobuf.Empt"
+  "y\032\026.google.protobuf.Empty\"\000\022B\n\016exit_emul"
+  "ation\022\026.google.protobuf.Empty\032\026.google.p"
+  "rotobuf.Empty\"\000\022=\n\tstep_into\022\026.google.pr"
+  "otobuf.Empty\032\026.google.protobuf.Empty\"\000\022="
+  "\n\tstep_over\022\026.google.protobuf.Empty\032\026.go"
+  "ogle.protobuf.Empty\"\000\022>\n\rget_callstack\022\026"
+  ".google.protobuf.Empty\032\023.idadebug.Callst"
+  "ack\"\0002\310\001\n\tDbgClient\022\?\n\013start_event\022\026.goo"
+  "gle.protobuf.Empty\032\026.google.protobuf.Emp"
+  "ty\"\000\022\?\n\013pause_event\022\026.idadebug.PauseChan"
+  "ged\032\026.google.protobuf.Empty\"\000\0229\n\nstop_ev"
+  "ent\022\021.idadebug.Changed\032\026.google.protobuf"
+  ".Empty\"\000b\006proto3"
   ;
 static const ::_pbi::DescriptorTable* const descriptor_table_debug_5fproto_5f68k_2eproto_deps[1] = {
   &::descriptor_table_google_2fprotobuf_2fempty_2eproto,
 };
 static ::_pbi::once_flag descriptor_table_debug_5fproto_5f68k_2eproto_once;
 const ::_pbi::DescriptorTable descriptor_table_debug_5fproto_5f68k_2eproto = {
-    false, false, 3597, descriptor_table_protodef_debug_5fproto_5f68k_2eproto,
+    false, false, 3616, descriptor_table_protodef_debug_5fproto_5f68k_2eproto,
     "debug_proto_68k.proto",
     &descriptor_table_debug_5fproto_5f68k_2eproto_once, descriptor_table_debug_5fproto_5f68k_2eproto_deps, 1, 18,
     schemas, file_default_instances, TableStruct_debug_5fproto_5f68k_2eproto::offsets,
@@ -3595,7 +3598,8 @@ DbgBreakpoint::DbgBreakpoint(const DbgBreakpoint& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
   DbgBreakpoint* const _this = this; (void)_this;
   new (&_impl_) Impl_{
-      decltype(_impl_.type_){}
+      decltype(_impl_.condition_){}
+    , decltype(_impl_.type_){}
     , decltype(_impl_.bstart_){}
     , decltype(_impl_.bend_){}
     , decltype(_impl_.enabled_){}
@@ -3604,6 +3608,14 @@ DbgBreakpoint::DbgBreakpoint(const DbgBreakpoint& from)
     , /*decltype(_impl_._cached_size_)*/{}};
 
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  _impl_.condition_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    _impl_.condition_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (!from._internal_condition().empty()) {
+    _this->_impl_.condition_.Set(from._internal_condition(), 
+      _this->GetArenaForAllocation());
+  }
   ::memcpy(&_impl_.type_, &from._impl_.type_,
     static_cast<size_t>(reinterpret_cast<char*>(&_impl_.is_forbid_) -
     reinterpret_cast<char*>(&_impl_.type_)) + sizeof(_impl_.is_forbid_));
@@ -3615,7 +3627,8 @@ inline void DbgBreakpoint::SharedCtor(
   (void)arena;
   (void)is_message_owned;
   new (&_impl_) Impl_{
-      decltype(_impl_.type_){0}
+      decltype(_impl_.condition_){}
+    , decltype(_impl_.type_){0}
     , decltype(_impl_.bstart_){0u}
     , decltype(_impl_.bend_){0u}
     , decltype(_impl_.enabled_){false}
@@ -3623,6 +3636,10 @@ inline void DbgBreakpoint::SharedCtor(
     , decltype(_impl_.is_forbid_){false}
     , /*decltype(_impl_._cached_size_)*/{}
   };
+  _impl_.condition_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    _impl_.condition_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
 }
 
 DbgBreakpoint::~DbgBreakpoint() {
@@ -3636,6 +3653,7 @@ DbgBreakpoint::~DbgBreakpoint() {
 
 inline void DbgBreakpoint::SharedDtor() {
   GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  _impl_.condition_.Destroy();
 }
 
 void DbgBreakpoint::SetCachedSize(int size) const {
@@ -3648,6 +3666,7 @@ void DbgBreakpoint::Clear() {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
+  _impl_.condition_.ClearToEmpty();
   ::memset(&_impl_.type_, 0, static_cast<size_t>(
       reinterpret_cast<char*>(&_impl_.is_forbid_) -
       reinterpret_cast<char*>(&_impl_.type_)) + sizeof(_impl_.is_forbid_));
@@ -3706,6 +3725,16 @@ const char* DbgBreakpoint::_InternalParse(const char* ptr, ::_pbi::ParseContext*
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 48)) {
           _impl_.is_forbid_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // string condition = 7;
+      case 7:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 58)) {
+          auto str = _internal_mutable_condition();
+          ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(ptr);
+          CHK_(::_pbi::VerifyUTF8(str, "idadebug.DbgBreakpoint.condition"));
         } else
           goto handle_unusual;
         continue;
@@ -3775,6 +3804,16 @@ uint8_t* DbgBreakpoint::_InternalSerialize(
     target = ::_pbi::WireFormatLite::WriteBoolToArray(6, this->_internal_is_forbid(), target);
   }
 
+  // string condition = 7;
+  if (!this->_internal_condition().empty()) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_condition().data(), static_cast<int>(this->_internal_condition().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "idadebug.DbgBreakpoint.condition");
+    target = stream->WriteStringMaybeAliased(
+        7, this->_internal_condition(), target);
+  }
+
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
@@ -3790,6 +3829,13 @@ size_t DbgBreakpoint::ByteSizeLong() const {
   uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
+
+  // string condition = 7;
+  if (!this->_internal_condition().empty()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_condition());
+  }
 
   // .idadebug.BpType type = 1;
   if (this->_internal_type() != 0) {
@@ -3840,6 +3886,9 @@ void DbgBreakpoint::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
+  if (!from._internal_condition().empty()) {
+    _this->_internal_set_condition(from._internal_condition());
+  }
   if (from._internal_type() != 0) {
     _this->_internal_set_type(from._internal_type());
   }
@@ -3874,7 +3923,13 @@ bool DbgBreakpoint::IsInitialized() const {
 
 void DbgBreakpoint::InternalSwap(DbgBreakpoint* other) {
   using std::swap;
+  auto* lhs_arena = GetArenaForAllocation();
+  auto* rhs_arena = other->GetArenaForAllocation();
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
+      &_impl_.condition_, lhs_arena,
+      &other->_impl_.condition_, rhs_arena
+  );
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
       PROTOBUF_FIELD_OFFSET(DbgBreakpoint, _impl_.is_forbid_)
       + sizeof(DbgBreakpoint::_impl_.is_forbid_)

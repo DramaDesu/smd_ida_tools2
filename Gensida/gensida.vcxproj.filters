@@ -13,6 +13,9 @@
     <Filter Include="data">
       <UniqueIdentifier>{687376ae-e8f0-4827-91ce-074ffe35b3c2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ida\helper_window">
+      <UniqueIdentifier>{8eb23cb7-8468-479e-8925-b56cf49c817a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ida\ida_debug.cpp">
@@ -35,6 +38,15 @@
     </ClCompile>
     <ClCompile Include="ida\ida_gens_helper_window.cpp">
       <Filter>ida</Filter>
+    </ClCompile>
+    <ClCompile Include="ida\helper_window\text_editor.cpp">
+      <Filter>ida\helper_window</Filter>
+    </ClCompile>
+    <ClCompile Include="ida\helper_window\assembler_documentation_provider.cpp">
+      <Filter>ida\helper_window</Filter>
+    </ClCompile>
+    <ClCompile Include="ida\helper_window\assembler_markdown.cpp">
+      <Filter>ida\helper_window</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -65,6 +77,18 @@
     <ClInclude Include="resource.h" />
     <ClInclude Include="ida\ida_gens_helper_window.h">
       <Filter>ida</Filter>
+    </ClInclude>
+    <ClInclude Include="ida\helper_window\text_editor.h">
+      <Filter>ida\helper_window</Filter>
+    </ClInclude>
+    <ClInclude Include="ida\helper_window\assembler_documentation_provider.h">
+      <Filter>ida\helper_window</Filter>
+    </ClInclude>
+    <ClInclude Include="ida\helper_window\imgui_markdown.h">
+      <Filter>ida\helper_window</Filter>
+    </ClInclude>
+    <ClInclude Include="ida\helper_window\assembler_markdown.h">
+      <Filter>ida\helper_window</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

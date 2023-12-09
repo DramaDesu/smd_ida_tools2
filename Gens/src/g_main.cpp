@@ -1525,6 +1525,7 @@ class DbgServerHandler final : public DbgServer::Service {
   Status add_breakpoint(ServerContext* context, const DbgBreakpoint* request, Empty* response) override {
 #ifdef DEBUG_68K
     Breakpoint b((bp_type)request->type(), request->bstart() & 0xFFFFFF, request->bend() & 0xFFFFFF, true, request->is_vdp(), false);
+    b.try_to_compile_condition(request->condition());
     M68kDW.Breakpoints.push_back(b);
 #else
     Breakpoint b((bp_type)request->type(), request->bstart() & 0xFFFFFF, request->bend() & 0xFFFFFF, true, false);
@@ -2163,6 +2164,7 @@ class DbgServerHandler final : public DbgServer::Service {
 #endif
           i->enabled = request->enabled();
           i->is_forbid = request->is_forbid();
+          i->try_to_compile_condition(request->condition());
           break;
 #ifdef DEBUG_68K
       }

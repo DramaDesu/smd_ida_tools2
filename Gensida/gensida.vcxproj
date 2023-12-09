@@ -200,7 +200,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>_DEBUG;__NT__;__IDP__;__X64__;DEBUG_68K;HAVE_UPDATE_CALL_STACK;SUPPORT_VISUALIZATION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;__NT__;__IDP__;__X64__;DEBUG_68K;HAVE_UPDATE_CALL_STACK;SUPPORT_VISUALIZATION;USE_DANGEROUS_FUNCTIONS;USE_STANDARD_FILE_FUNCTIONS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(IDA_SDK)\include\;$(SolutionDir)\;$(ProjectDir)\ida\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -391,6 +391,9 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release80_68k|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release80_68k|Win32'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="ida\helper_window\assembler_documentation_provider.cpp" />
+    <ClCompile Include="ida\helper_window\assembler_markdown.cpp" />
+    <ClCompile Include="ida\helper_window\text_editor.cpp" />
     <ClCompile Include="ida\ida_debug.cpp" />
     <ClCompile Include="ida\ida_gens_helper_window.cpp" />
     <ClCompile Include="ida\ida_plugin.cpp" />
@@ -420,6 +423,10 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release80_68k|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release80_68k|Win32'">true</ExcludedFromBuild>
     </ClInclude>
+    <ClInclude Include="ida\helper_window\assembler_documentation_provider.h" />
+    <ClInclude Include="ida\helper_window\assembler_markdown.h" />
+    <ClInclude Include="ida\helper_window\imgui_markdown.h" />
+    <ClInclude Include="ida\helper_window\text_editor.h" />
     <ClInclude Include="ida\ida_debmod.h" />
     <ClInclude Include="ida\ida_debug.h" />
     <ClInclude Include="ida\ida_gens_helper_window.h" />

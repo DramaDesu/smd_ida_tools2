@@ -2030,7 +2030,7 @@ static plugmod_t* idaapi init(void)
   {
     plugin_inited = true;
     dbg_started = false;
-    my_dbg = true;
+    my_dbg = false;
 
 #ifdef DEBUG_68K
     bool res = register_action(smd_constant_action);

@@ -73,6 +73,7 @@
     <LinkIncremental>true</LinkIncremental>
     <TargetName>$(ProjectName)_m68k</TargetName>
     <IntDir>$(Configuration)_gens\</IntDir>
+    <OutDir>E:\Data\IDA\gensida\gens</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_z80|Win32'">
     <LinkIncremental>true</LinkIncremental>
@@ -111,7 +112,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_CRT_SECURE_NO_WARNINGS;DEBUG_68K;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)\;$(ProjectDir)\include\;$(SolutionDir)\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\cparse\cparse;$(ProjectDir)\;$(ProjectDir)\include\;$(SolutionDir)\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <MinimalRebuild>false</MinimalRebuild>
@@ -120,7 +121,8 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>winmm.lib;comctl32.lib;ws2_32.lib;Iphlpapi.lib;Crypt32.lib;libs\dx7\ddraw.lib;libs\dx7\dinput.lib;libs\dx7\dsound.lib;libs\dx7\dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>winmm.lib;comctl32.lib;ws2_32.lib;Iphlpapi.lib;Crypt32.lib;libs\dx7\ddraw.lib;libs\dx7\dinput.lib;libs\dx7\dsound.lib;libs\dx7\dxguid.lib;cparse.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)libs\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PreBuildEvent />
   </ItemDefinitionGroup>
@@ -547,6 +549,11 @@
     <Image Include="resource\gens_small.bmp" />
     <Image Include="resource\lua.ico" />
     <Image Include="resource\sonic.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\cparse\cparse\cparse.vcxproj">
+      <Project>{ee2325ea-46cc-4a6c-a6b0-da3f5d03d583}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

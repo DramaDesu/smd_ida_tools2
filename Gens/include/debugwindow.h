@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include <map>
+#include <memory>
 
 typedef unsigned int uint32;
 typedef unsigned short ushort;
@@ -13,6 +14,13 @@ enum class bp_type
     BP_PC = 1,
     BP_READ,
     BP_WRITE,
+};
+
+struct BreakpointCondition
+{
+    bool check_condition() const;
+
+    bool is_compiled = true;
 };
 
 struct Breakpoint
@@ -29,11 +37,17 @@ struct Breakpoint
     bool is_vdp;
 
     Breakpoint(bp_type _type, uint32 _start, uint32 _end, bool _enabled, bool _is_vdp, bool _is_forbid) :
-      type(_type), start(_start), end(_end), enabled(_enabled), is_vdp(_is_vdp), is_forbid(_is_forbid) {};
+      type(_type), start(_start), end(_end), enabled(_enabled), is_forbid(_is_forbid), is_vdp(_is_vdp) {}
 #else
     Breakpoint(bp_type _type, uint32 _start, uint32 _end, bool _enabled, bool _is_forbid) :
       type(_type), start(_start), end(_end), enabled(_enabled), is_forbid(_is_forbid) {};
 #endif
+
+    bool check_condition() const;
+    void try_to_compile_condition(const std::string& in_condition);
+
+private:
+    BreakpointCondition breakpoint_condition;
 };
 
 typedef std::vector<Breakpoint> bp_list;
@@ -58,7 +72,7 @@ struct DebugWindow
 
     void Breakpoint(int pc);
 
-    bool BreakPC(int pc);
+    bool BreakPC(int pc) const;
 #ifdef DEBUG_68K
     bool BreakRead(int pc, uint32 start, uint32 stop, bool is_vdp);
     bool BreakWrite(int pc, uint32 start, uint32 stop, bool is_vdp);
