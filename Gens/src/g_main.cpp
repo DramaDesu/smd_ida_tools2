@@ -1524,9 +1524,8 @@ static void toggle_pause() {
 class DbgServerHandler final : public DbgServer::Service {
   Status add_breakpoint(ServerContext* context, const DbgBreakpoint* request, Empty* response) override {
 #ifdef DEBUG_68K
-    Breakpoint b((bp_type)request->type(), request->bstart() & 0xFFFFFF, request->bend() & 0xFFFFFF, true, request->is_vdp(), false);
-    b.try_to_compile_condition(request->condition());
-    M68kDW.Breakpoints.push_back(b);
+    M68kDW.Breakpoints.emplace_back((bp_type)request->type(), request->bstart() & 0xFFFFFF, request->bend() & 0xFFFFFF, true, request->is_vdp(), false);
+    M68kDW.Breakpoints.back().try_to_compile_condition(request->condition());
 #else
     Breakpoint b((bp_type)request->type(), request->bstart() & 0xFFFFFF, request->bend() & 0xFFFFFF, true, false);
     Z80DW.Breakpoints.push_back(b);
@@ -1547,6 +1546,8 @@ class DbgServerHandler final : public DbgServer::Service {
 
   Status del_breakpoint(ServerContext* context, const DbgBreakpoint* request, Empty* response) override {
 #ifdef DEBUG_68K
+      bp_list updated_breakpoints;
+
     for (auto i = M68kDW.Breakpoints.begin(); i != M68kDW.Breakpoints.end(); ++i) {
 #else
     for (auto i = Z80DW.Breakpoints.begin(); i != Z80DW.Breakpoints.end(); ++i) {
@@ -1554,15 +1555,18 @@ class DbgServerHandler final : public DbgServer::Service {
       if (request->type() == (BpType)i->type && request->bstart() == i->start) {
 #ifdef DEBUG_68K
         if (request->is_vdp() == i->is_vdp) {
-          M68kDW.Breakpoints.erase(i);
-          break;
+            continue;
         }
 #else
         Z80DW.Breakpoints.erase(i);
         break;
 #endif
+        updated_breakpoints.emplace_back(std::move(*i));
       }
     }
+
+    // TODO (Might use unique_ptr), or another way to sync break_points
+    M68kDW.Breakpoints = std::move(updated_breakpoints);
 
     return Status::OK;
   }
@@ -2160,11 +2164,11 @@ class DbgServerHandler final : public DbgServer::Service {
 #endif
       if (request->type() == (BpType)i->type && request->bstart() == i->start) {
 #ifdef DEBUG_68K
+		i->try_to_compile_condition(request->condition());
         if (request->is_vdp() == i->is_vdp) {
 #endif
           i->enabled = request->enabled();
           i->is_forbid = request->is_forbid();
-          i->try_to_compile_condition(request->condition());
           break;
 #ifdef DEBUG_68K
       }
@@ -2232,8 +2236,9 @@ static void init_dbg_server() {
 
 #ifdef DEBUG_68K
   M68kDW.Breakpoints.clear();
-  Breakpoint b(bp_type::BP_PC, main68k_context.pc & 0xFFFFFF, main68k_context.pc & 0xFFFFFF, true, false, false);
-  M68kDW.Breakpoints.push_back(b);
+  M68kDW.Breakpoints.reserve(0x10);
+  M68kDW.Breakpoints.emplace_back(bp_type::BP_PC, main68k_context.pc & 0xFFFFFF, main68k_context.pc & 0xFFFFFF, true, false, false);
+  M68kDW.Breakpoints.back().try_to_compile_condition("");
 #else
   Z80DW.Breakpoints.clear();
   Breakpoint b(bp_type::BP_PC, 0, 0, true, false);

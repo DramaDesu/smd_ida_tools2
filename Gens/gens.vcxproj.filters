@@ -22,6 +22,9 @@
     <Filter Include="asm">
       <UniqueIdentifier>{2098e8b2-5155-40a1-9b9d-c3f69e0ff8ec}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\break_points">
+      <UniqueIdentifier>{ac5410fc-9770-4a48-9031-cd5cc21c9eac}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="asm\vdp_io.asm">
@@ -299,6 +302,9 @@
     <ClCompile Include="..\proto\debug_proto_z80.pb.cc">
       <Filter>proto</Filter>
     </ClCompile>
+    <ClCompile Include="..\tinyexpr\tinyexpr.c">
+      <Filter>src\break_points</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lua\src\lapi.h">
@@ -564,6 +570,9 @@
     </ClInclude>
     <ClInclude Include="include\ym2612_psg_debug.h">
       <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\tinyexpr\tinyexpr.h">
+      <Filter>src\break_points</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

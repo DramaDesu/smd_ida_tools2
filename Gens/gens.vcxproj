@@ -331,6 +331,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_68k|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_68k|Win32'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\tinyexpr\tinyexpr.c" />
     <ClCompile Include="lua\src\lapi.c" />
     <ClCompile Include="lua\src\lauxlib.c" />
     <ClCompile Include="lua\src\lbaselib.c" />
@@ -430,6 +431,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_68k|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_68k|Win32'">true</ExcludedFromBuild>
     </ClInclude>
+    <ClInclude Include="..\tinyexpr\tinyexpr.h" />
     <ClInclude Include="include\blit.h" />
     <ClInclude Include="include\corehooks.h" />
     <ClInclude Include="include\cpu_68k.h" />
@@ -549,11 +551,6 @@
     <Image Include="resource\gens_small.bmp" />
     <Image Include="resource\lua.ico" />
     <Image Include="resource\sonic.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\cparse\cparse\cparse.vcxproj">
-      <Project>{ee2325ea-46cc-4a6c-a6b0-da3f5d03d583}</Project>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

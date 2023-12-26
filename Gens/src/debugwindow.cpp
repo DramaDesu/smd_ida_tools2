@@ -10,28 +10,39 @@
 #include <vector>
 #include <iostream>
 
+#include "m68k_debugwindow.h"
+
 bool handled_ida_event;
 
 void Handle_Gens_Messages();
 extern int Gens_Running;
 extern "C" int Clear_Sound_Buffer(void);
 
+// const static std::vector<te_variable> M68K_ENVIRONMENT = { {"d0.b", &D0}, {"d1.w", &D1}, {"a0", &A0}, {"addr_val", addr_val, TE_FUNCTION1} };
+const static std::vector<te_variable> M68K_ENVIRONMENT = {
+	{
+		"D0", &main68k_context.dreg[0]
+	},
+    {
+        "D1", &main68k_context.dreg[1]
+    },
+    {
+        "D2", &main68k_context.dreg[2]
+    }};
+
 bool BreakpointCondition::check_condition() const
 {
-    if (!is_compiled)
-    {
-	    return false;
-    }
-
-    return true;
+	if (condition_expr == nullptr)
+	{
+		return true;
+	}
+    return te_logic_eval(condition_expr) > 0;
 }
 
 bool Breakpoint::check_condition() const
 {
     return breakpoint_condition.check_condition();
 }
-
-#include "shunting-yard.h"
 
 void Breakpoint::try_to_compile_condition(const std::string& in_condition)
 {
@@ -40,22 +51,20 @@ void Breakpoint::try_to_compile_condition(const std::string& in_condition)
 		return;
 	}
 
-    breakpoint_condition.is_compiled = false;
+    BreakpointConditionWorker::get().enqueue([in_type = type, in_start = start, in_condition]
+    {
+    	te_expr* expr = te_compile(in_condition.c_str(), true, M68K_ENVIRONMENT.data(), M68K_ENVIRONMENT.size(), nullptr);
 
-	cparse::TokenMap vars;
-    vars["pi"] = 3.14;
-	try
-	{
-        const auto token_value = cparse::calculator::calculate("7+1", &vars);
-        if (token_value.asDouble())
+        for (auto i = M68kDW.Breakpoints.begin(); i != M68kDW.Breakpoints.end(); ++i) 
         {
-
+            if (i->type == in_type && i->start == in_start)
+            {
+                te_free(i->breakpoint_condition.condition_expr.load());
+                i->breakpoint_condition.condition_expr.store(expr);
+	            break;
+            }
         }
-	}
-	catch (...)
-	{
-        std::cout << "WTF" << std::endl;
-	}
+    });
 }
 
 DebugWindow::DebugWindow()

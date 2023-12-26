@@ -10,10 +10,13 @@ M68kDebugWindow M68kDW;
 M68kDebugWindow::M68kDebugWindow()
 {
   last_pc = 0;
+
+  BreakpointConditionWorker::get().start();
 }
 
 M68kDebugWindow::~M68kDebugWindow()
 {
+    BreakpointConditionWorker::get().stop();
 }
 
 void M68kDebugWindow::TracePC(int pc)

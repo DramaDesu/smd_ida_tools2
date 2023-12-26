@@ -1,10 +1,17 @@
 #ifndef DEBUG_WINDOW_H
 #define DEBUG_WINDOW_H
 
+#include <atomic>
+#include <functional>
 #include <vector>
 #include <string>
 #include <map>
 #include <memory>
+#include <mutex>
+#include <queue>
+#include <thread>
+
+#include "tinyexpr/tinyexpr.h"
 
 typedef unsigned int uint32;
 typedef unsigned short ushort;
@@ -16,11 +23,98 @@ enum class bp_type
     BP_WRITE,
 };
 
+struct BreakpointConditionWorker
+{
+	static BreakpointConditionWorker& get()
+	{
+		static BreakpointConditionWorker instance;
+        return instance;
+	}
+
+    void start()
+	{
+        should_stop = false;
+        worker_thread = std::thread(&BreakpointConditionWorker::worker, this);
+	}
+
+    void enqueue(std::function<void()>&& in_task)
+    {
+		if (should_stop)
+		{
+			return;
+		}
+		{
+            std::lock_guard<std::mutex> lock(task_mutex);
+            tasks.emplace(in_task);
+		}
+        
+        task_cv.notify_one();
+    }
+
+    void stop()
+    {
+		if (worker_thread.joinable())
+		{
+            should_stop = true;
+            task_cv.notify_one();
+
+            worker_thread.join();
+		}
+    }
+
+private:
+    void worker()
+    {
+	    while (!should_stop)
+	    {
+		    std::unique_lock<std::mutex> lock(task_mutex);
+            task_cv.wait(lock, [&] { return !tasks.empty() || should_stop; });
+            if (tasks.empty())
+            {
+	            continue;
+            }
+
+            const std::function<void()> task = tasks.front();
+            tasks.pop();
+
+            lock.unlock();
+
+            task();
+	    }
+    }
+
+    std::mutex task_mutex; 
+    std::condition_variable task_cv; 
+
+    std::atomic<bool> should_stop;
+    std::thread worker_thread;
+
+    std::queue<std::function<void()>> tasks;
+};
+
 struct BreakpointCondition
 {
+    ~BreakpointCondition()
+    {
+	    te_free(condition_expr);
+    }
+
+    BreakpointCondition& operator=(BreakpointCondition&& other) noexcept
+    {
+        if (this == &other)
+        {
+            return *this;
+        }
+
+        condition_expr.store(other.condition_expr);
+        other.condition_expr.store(nullptr);
+
+        return *this;
+    }
+
     bool check_condition() const;
 
-    bool is_compiled = true;
+    std::atomic<te_expr*> condition_expr;
 };
 
 struct Breakpoint
@@ -38,6 +132,13 @@ struct Breakpoint
 
     Breakpoint(bp_type _type, uint32 _start, uint32 _end, bool _enabled, bool _is_vdp, bool _is_forbid) :
       type(_type), start(_start), end(_end), enabled(_enabled), is_forbid(_is_forbid), is_vdp(_is_vdp) {}
+
+    Breakpoint(Breakpoint&& other) noexcept
+       : type(other.type), start(other.start), end(other.end), enabled(other.enabled), is_forbid(other.is_forbid), is_vdp(other.is_vdp)
+    {
+        breakpoint_condition = std::move(other.breakpoint_condition);
+	}
+
 #else
     Breakpoint(bp_type _type, uint32 _start, uint32 _end, bool _enabled, bool _is_forbid) :
       type(_type), start(_start), end(_end), enabled(_enabled), is_forbid(_is_forbid) {};
