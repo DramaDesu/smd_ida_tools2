@@ -2,6 +2,8 @@
 
 #include "ida_gens_helper_window.h"
 
+#ifdef SUPPORT_VISUALIZATION
+
 #include <bytes.hpp>
 #include <imgui.h>
 #include <imgui_impl_sdl2.h>
@@ -255,3 +257,5 @@ void ida_gens_helper_window::draw_current_command()
     ImGui::GetFont()->Scale = previous_font_scale;
     ImGui::PopFont();
 }
+
+#endif

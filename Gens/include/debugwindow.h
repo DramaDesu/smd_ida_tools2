@@ -13,6 +13,7 @@
 
 #include "tinyexpr/tinyexpr.h"
 
+struct Breakpoint;
 typedef unsigned int uint32;
 typedef unsigned short ushort;
 
@@ -94,27 +95,33 @@ private:
 
 struct BreakpointCondition
 {
-    ~BreakpointCondition()
-    {
-	    te_free(condition_expr);
-    }
+	BreakpointCondition() = default;
+    ~BreakpointCondition();
 
-    BreakpointCondition& operator=(BreakpointCondition&& other) noexcept
-    {
-        if (this == &other)
-        {
-            return *this;
-        }
+	BreakpointCondition(const BreakpointCondition& other);
+	BreakpointCondition(BreakpointCondition&& other) noexcept = default;
 
-        condition_expr.store(other.condition_expr);
-        other.condition_expr.store(nullptr);
-
-        return *this;
-    }
+    BreakpointCondition& operator=(const BreakpointCondition& other);
+    BreakpointCondition& operator=(BreakpointCondition&& other) noexcept = default;
 
     bool check_condition() const;
+    void try_to_compile_condition(bp_type in_type, uint32 in_start, const std::string& in_condition);
 
-    std::atomic<te_expr*> condition_expr;
+    void load_compiled_condition(te_expr* in_expr) const;
+
+private:
+	static void try_to_compile_condition_inner(bp_type in_type, uint32 in_start, const std::string& in_condition);
+
+	struct condition_state_t
+	{
+        bp_type type{};
+        uint32 start{};
+
+        std::string raw_expr;
+        std::atomic<te_expr*> expr;
+	};
+
+    std::unique_ptr<condition_state_t> condition_state;
 };
 
 struct Breakpoint
@@ -133,18 +140,13 @@ struct Breakpoint
     Breakpoint(bp_type _type, uint32 _start, uint32 _end, bool _enabled, bool _is_vdp, bool _is_forbid) :
       type(_type), start(_start), end(_end), enabled(_enabled), is_forbid(_is_forbid), is_vdp(_is_vdp) {}
 
-    Breakpoint(Breakpoint&& other) noexcept
-       : type(other.type), start(other.start), end(other.end), enabled(other.enabled), is_forbid(other.is_forbid), is_vdp(other.is_vdp)
-    {
-        breakpoint_condition = std::move(other.breakpoint_condition);
-	}
-
 #else
     Breakpoint(bp_type _type, uint32 _start, uint32 _end, bool _enabled, bool _is_forbid) :
       type(_type), start(_start), end(_end), enabled(_enabled), is_forbid(_is_forbid) {};
 #endif
 
     bool check_condition() const;
+    void load_compiled_condition(te_expr* in_expr) const;
     void try_to_compile_condition(const std::string& in_condition);
 
 private:

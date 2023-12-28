@@ -254,6 +254,7 @@ LRESULT CALLBACK RamSearchProc(HWND, UINT, WPARAM, LPARAM);
 LRESULT CALLBACK RamWatchProc(HWND, UINT, WPARAM, LPARAM);
 LRESULT CALLBACK HexEditorProc(HWND, UINT, WPARAM, LPARAM);
 LRESULT CALLBACK VDPRamProc(HWND, UINT, WPARAM, LPARAM);
+// LRESULT CALLBACK BreakPointsProc(HWND, UINT, WPARAM, LPARAM);
 #ifdef DEBUG_Z80
 LRESULT CALLBACK YM2612WndProcDialog(HWND, UINT, WPARAM, LPARAM);
 #endif
@@ -1546,27 +1547,22 @@ class DbgServerHandler final : public DbgServer::Service {
 
   Status del_breakpoint(ServerContext* context, const DbgBreakpoint* request, Empty* response) override {
 #ifdef DEBUG_68K
-      bp_list updated_breakpoints;
-
-    for (auto i = M68kDW.Breakpoints.begin(); i != M68kDW.Breakpoints.end(); ++i) {
+    for (auto i = M68kDW.Breakpoints.cbegin(); i != M68kDW.Breakpoints.cend(); ++i) {
 #else
     for (auto i = Z80DW.Breakpoints.begin(); i != Z80DW.Breakpoints.end(); ++i) {
 #endif
       if (request->type() == (BpType)i->type && request->bstart() == i->start) {
 #ifdef DEBUG_68K
         if (request->is_vdp() == i->is_vdp) {
-            continue;
+            M68kDW.Breakpoints.erase(i);
+            break;
         }
 #else
         Z80DW.Breakpoints.erase(i);
         break;
 #endif
-        updated_breakpoints.emplace_back(std::move(*i));
       }
     }
-
-    // TODO (Might use unique_ptr), or another way to sync break_points
-    M68kDW.Breakpoints = std::move(updated_breakpoints);
 
     return Status::OK;
   }
@@ -2164,11 +2160,11 @@ class DbgServerHandler final : public DbgServer::Service {
 #endif
       if (request->type() == (BpType)i->type && request->bstart() == i->start) {
 #ifdef DEBUG_68K
-		i->try_to_compile_condition(request->condition());
         if (request->is_vdp() == i->is_vdp) {
 #endif
           i->enabled = request->enabled();
           i->is_forbid = request->is_forbid();
+          i->try_to_compile_condition(request->condition());
           break;
 #ifdef DEBUG_68K
       }
@@ -2234,11 +2230,12 @@ static void init_dbg_server() {
 
   atexit(stop_server);
 
+  constexpr auto BREAKPOINTS_START_CAPACITY = 0x10;
+
 #ifdef DEBUG_68K
   M68kDW.Breakpoints.clear();
-  M68kDW.Breakpoints.reserve(0x10);
+  M68kDW.Breakpoints.reserve(BREAKPOINTS_START_CAPACITY);
   M68kDW.Breakpoints.emplace_back(bp_type::BP_PC, main68k_context.pc & 0xFFFFFF, main68k_context.pc & 0xFFFFFF, true, false, false);
-  M68kDW.Breakpoints.back().try_to_compile_condition("");
 #else
   Z80DW.Breakpoints.clear();
   Breakpoint b(bp_type::BP_PC, 0, 0, true, false);

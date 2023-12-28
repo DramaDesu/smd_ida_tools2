@@ -1,5 +1,7 @@
 #pragma once
 
+#ifdef SUPPORT_VISUALIZATION
+
 #include <atomic>
 #include <mutex>
 
@@ -52,3 +54,4 @@ private:
 	assembler_documentation_provider documentation_provider;
 };
 
+#endif
