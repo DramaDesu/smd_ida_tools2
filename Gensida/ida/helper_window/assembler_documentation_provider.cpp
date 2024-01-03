@@ -114,6 +114,20 @@ std::string assembler_documentation_provider::get_mnemonic_description(const ins
 	return ss.str();
 }
 
+void cleanup_markdown_data(std::string& out_data)
+{
+	const static std::string tags[] = { "<br/>", "&nbsp;" };
+
+	for (const auto& tag : tags)
+	{
+		size_t pos;
+		while ((pos = out_data.find(tag)) != std::string::npos)
+		{
+			out_data.erase(pos, tag.length());
+		}
+	}
+}
+
 assembler_documentation_provider::loading_e assembler_documentation_provider::try_to_get_instruction_description(const ea_t in_ea, const char*& out_data, size_t& out_data_size)
 {
 	if (!is_mapped(in_ea))
@@ -156,6 +170,10 @@ assembler_documentation_provider::loading_e assembler_documentation_provider::tr
 		{
 			instructions_data.insert_or_assign(mnemonic_id, response.text);
 			instructions_states[mnemonic_id] = loading_e::success;
+
+			// TODO: Move to async process
+			cleanup_markdown_data(instructions_data[mnemonic_id]);
+
 			return loading_e::loading;
 		}
 	}

@@ -228,6 +228,8 @@ ___
 
 #include <imgui.h>
 #include <stdint.h>
+#include <string.h>
+#include <cstring>
 
 namespace ImGui
 {
@@ -273,11 +275,15 @@ namespace ImGui
          UNORDERED_LIST,
          LINK,
          EMPHASIS,
+         CODE,
     };
 
     struct MarkdownFormatInfo
     {
         MarkdownFormatType      type    = MarkdownFormatType::NORMAL_TEXT;
+        const char*             data    = nullptr;
+        int                     data_len = 0;
+        bool                    is_comment = false;
         int32_t                 level   = 0;                               // Set for headings: 1 for H1, 2 for H2 etc.
         bool                    itemHovered = false;                       // Currently only set for links when mouse hovered, only valid when start_ == false
         const MarkdownConfig*   config  = NULL;
@@ -338,8 +344,24 @@ namespace ImGui
 
     struct TextRegion;
     struct Line;
+
+    struct MarkdownLineInfo
+    {
+        MarkdownLineInfo(const char* markdown_, Line& line_, TextRegion& textRegion_, const MarkdownConfig& mdConfig_)
+    		: markdown(markdown_), line(line_), text_region(textRegion_), config(mdConfig_)
+        {
+        }
+
+        const char* markdown;
+        Line& line;
+        TextRegion& text_region;
+
+        const MarkdownConfig& config;
+    };
+
     inline void UnderLine( ImColor col_ );
     inline void RenderLine( const char* markdown_, Line& line_, TextRegion& textRegion_, const MarkdownConfig& mdConfig_ );
+    inline void RenderLine(const MarkdownLineInfo& in_line_info);
 
     struct TextRegion
     {
@@ -414,6 +436,8 @@ namespace ImGui
         bool isHeading = false;
         bool isEmphasis = false;
         bool isUnorderedListStart = false;
+        bool isCode = false;
+        bool isComment = false;
         bool isLeadingSpace = true;     // spaces at start of line
         int  leadSpaceCount = 0;
         int  headingCount = 0;
@@ -426,6 +450,10 @@ namespace ImGui
     struct TextBlock {                  // subset of line
         int start = 0;
         int stop  = 0;
+        bool is_valid() const
+        {
+            return stop > start;
+        }
         int size() const
         {
             return stop - start;
@@ -454,9 +482,22 @@ namespace ImGui
 			RIGHT,
 		};
         EmphasisState state = NONE;
+        TextBlock context;
         TextBlock text;
         char sym;
 	};
+
+    struct Code {
+        enum CodeState {
+            NONE,
+            START,
+            TEXT,
+            FINISH
+        };
+        CodeState state = NONE;
+        TextBlock block;
+        char sym;
+    };
 
     inline void UnderLine( ImColor col_ )
     {
@@ -464,6 +505,90 @@ namespace ImGui
         ImVec2 max = ImGui::GetItemRectMax();
         min.y = max.y;
         ImGui::GetWindowDrawList()->AddLine( min, max, col_, 1.0f );
+    }
+
+    inline void RenderCode(const char* markdown_, const TextBlock& in_context, Line& line_, TextRegion& textRegion_, const MarkdownConfig& mdConfig_)
+    {
+	    if (!in_context.is_valid())
+	    {
+		    return;
+	    }
+
+        const char* context_name = markdown_ + in_context.start;
+
+        const int code_start_position = line_.lastRenderPosition + 1;
+        const int code_size = line_.lineEnd - code_start_position;
+
+        const char* text_start = markdown_ + line_.lastRenderPosition + 1;
+
+        ImGui::Indent();
+
+        int current_render_position = code_start_position - 1;
+
+        bool opened_var = false;
+        bool should_same_line = true;
+
+	    const MarkdownLineInfo line_info(markdown_, line_, textRegion_, mdConfig_);
+
+        for (int i = 0; i < code_size; i++)
+        {
+            const char c = text_start[i];
+			const bool is_eof = i == code_size - 1;
+
+            const int target_render_position = code_start_position + i;
+
+            if (c == ' ' || c == ',' || c == '\n' || is_eof)
+            {
+                if (c == '\n')
+                {
+                    should_same_line = false;
+                }
+
+	            line_.lastRenderPosition = current_render_position;
+                line_.lineEnd = target_render_position;
+                if (is_eof)
+                {
+                    line_.lineEnd++;
+                }/**/
+                RenderLine(line_info);
+                if (should_same_line)
+                {
+                    ImGui::SameLine();
+                }
+                else
+                {
+                    should_same_line = true;
+                }
+
+                if (c == '\n')
+                {
+                    line_.isComment = false;
+                }
+
+                if (c == ',' || (!opened_var && c == ' '))
+                {
+                    line_.lastRenderPosition = target_render_position - 1;
+                    line_.lineEnd = target_render_position + 1;
+                    RenderLine(markdown_, line_, textRegion_, mdConfig_);
+                    ImGui::SameLine();
+                }
+
+                current_render_position = target_render_position;
+            }
+            else if (!opened_var && c == '<')
+            {
+                opened_var = true;
+            }
+            else if (opened_var && c == '>')
+            {
+	            opened_var = false;
+            }
+            else if (c == ';')
+            {
+                line_.isComment = true;
+            }
+        }
+        ImGui::Unindent();
     }
 
     inline void RenderLine( const char* markdown_, Line& line_, TextRegion& textRegion_, const MarkdownConfig& mdConfig_ )
@@ -482,8 +607,8 @@ namespace ImGui
         // render
         MarkdownFormatInfo formatInfo;
         formatInfo.config = &mdConfig_;
-        int textStart = line_.lastRenderPosition + 1;
-        int textSize = line_.lineEnd - textStart;
+        const int textStart = line_.lastRenderPosition + 1;
+        const int textSize = line_.lineEnd - textStart;
         if( line_.isUnorderedListStart )    // render unordered list
         {
             formatInfo.type = MarkdownFormatType::UNORDERED_LIST;
@@ -507,6 +632,15 @@ namespace ImGui
 			const char* text = markdown_ + textStart;
 			textRegion_.RenderTextWrapped(text, text + textSize);
 		}
+        else if (line_.isCode)
+        {
+            const char* text = markdown_ + textStart;
+            formatInfo.type = MarkdownFormatType::CODE;
+            formatInfo.data = text;
+            formatInfo.data_len = textSize;
+            mdConfig_.formatCallback(formatInfo, true);
+            textRegion_.RenderTextWrapped(text, text + textSize);
+        }
         else                                // render a normal paragraph chunk
         {
             formatInfo.type = MarkdownFormatType::NORMAL_TEXT;
@@ -522,7 +656,30 @@ namespace ImGui
             ImGui::Unindent();
         }
     }
-    
+
+    inline void RenderLine(const MarkdownLineInfo& in_line_info)
+    {
+        MarkdownFormatInfo formatInfo;
+        formatInfo.config = &in_line_info.config;
+        const int textStart = in_line_info.line.lastRenderPosition + 1;
+        const int textSize = in_line_info.line.lineEnd - textStart;
+
+        if (!in_line_info.line.isCode)
+        {
+	        return;
+        }
+
+        const char* text = in_line_info.markdown + textStart;
+        formatInfo.type = MarkdownFormatType::CODE;
+        formatInfo.data = text;
+        formatInfo.data_len = textSize;
+        formatInfo.is_comment = in_line_info.line.isComment;
+
+        in_line_info.config.formatCallback(formatInfo, true);
+        in_line_info.text_region.RenderTextWrapped(text, text + textSize);
+        in_line_info.config.formatCallback(formatInfo, false);
+    }
+
     // render markdown
     inline void Markdown( const char* markdown_, size_t markdownLength_, const MarkdownConfig& mdConfig_ )
     {
@@ -531,6 +688,7 @@ namespace ImGui
         Line        line;
         Link        link;
         Emphasis    em;
+        Code        code;
         TextRegion  textRegion;
 
         char c = 0;
@@ -695,7 +853,7 @@ namespace ImGui
                 {
                     int next = i + 1;
                     int prev = i - 1;
-					if( ( c == '*' || c == '_' )
+					if( ( c == '*' || c == '_' || c == '`')
                         && ( i == line.lineStart
                             || markdown_[ prev ] == ' '
                             || markdown_[ prev ] == '\t' ) // empasis must be preceded by whitespace or line start
@@ -713,16 +871,19 @@ namespace ImGui
 				}
 				break;
 			case Emphasis::LEFT:
-				if( em.sym == c )
+                if (em.sym == c)
                 {
-					++line.emphasisCount;
-					continue;
-				}
-                else
+                    ++line.emphasisCount;
+                    continue;
+                }
+                if (line.emphasisCount == 3)
                 {
-					em.text.start = i;
-					em.state = Emphasis::MIDDLE;
-				}
+                    em.context.start = i;
+                    em.state = Emphasis::MIDDLE;
+                    continue;
+                }
+                em.text.start = i;
+                em.state = Emphasis::MIDDLE;
 				break;
 			case Emphasis::MIDDLE:
 				if( em.sym == c )
@@ -733,59 +894,124 @@ namespace ImGui
 				}
                 else
                 {
+                    if (line.emphasisCount == 3 && !em.context.is_valid() && (c == '\n' || c == ' '))
+                    {
+                        em.context.stop = i;
+                        continue;
+                    }
+                    if (line.emphasisCount == 3 && em.context.is_valid())
+                    {
+                        em.state = Emphasis::RIGHT;
+                        em.text.start = i;
+                        continue;
+                    }
+
                     break;
                 }
 			case Emphasis::RIGHT:
-				if( em.sym == c )
-                {
-					if( line.emphasisCount < 3 && ( i - em.text.stop + 1 == line.emphasisCount ) )
-                    {
-                        // render text up to emphasis
-                        int lineEnd = em.text.start - line.emphasisCount;
-                        if( lineEnd > line.lineStart )
-                        {
-                            line.lineEnd = lineEnd;
-                            RenderLine( markdown_, line, textRegion, mdConfig_ );
-						    ImGui::SameLine( 0.0f, 0.0f );
-                            line.isUnorderedListStart = false;
-                            line.leadSpaceCount = 0;
-                        }
-						line.isEmphasis = true;
+				if ( em.sym == c )
+				{
+					if ((line.emphasisCount < 3 && i - em.text.stop + 1 == line.emphasisCount) || em.context.is_valid())
+					{
+						if (em.context.is_valid())
+						{
+                            line.emphasisCount--;
+                            if (line.emphasisCount > 0)
+                            {
+	                            continue;
+                            }
+						}
+
+						// render text up to emphasis
+						int lineEnd = em.text.start - line.emphasisCount;
+						if (!em.context.is_valid() && lineEnd > line.lineStart)
+						{
+							line.lineEnd = lineEnd;
+							RenderLine( markdown_, line, textRegion, mdConfig_ );
+							ImGui::SameLine( 0.0f, 0.0f );
+							line.isUnorderedListStart = false;
+							line.leadSpaceCount = 0;
+						}
 						line.lastRenderPosition = em.text.start - 1;
-                        line.lineStart = em.text.start;
-					    line.lineEnd = em.text.stop;
-					    RenderLine( markdown_, line, textRegion, mdConfig_ );
-					    ImGui::SameLine( 0.0f, 0.0f );
-					    line.isEmphasis = false;
-					    line.lastRenderPosition = i;
-					    em = Emphasis();
-                    }
-                    continue;
-				} 
-                else
+						line.lineStart = em.text.start;
+						line.lineEnd = em.text.stop;
+                        if (em.context.is_valid())
+                        {
+                            line.isCode = true;
+                            RenderCode(markdown_, em.context, line, textRegion, mdConfig_);
+                        }
+                        else
+                        {
+                            line.isEmphasis = true;
+                            RenderLine(markdown_, line, textRegion, mdConfig_);
+                        }
+						ImGui::SameLine( 0.0f, 0.0f );
+						line.isEmphasis = false;
+						line.lastRenderPosition = i;
+						em = Emphasis();
+					}
+					continue;
+				}
+                if (line.emphasisCount == 3 && em.context.is_valid())
                 {
-                    em.state = Emphasis::NONE;
-                    // render text up to here
-                    int start = em.text.start - line.emphasisCount;
-                    if( start < line.lineStart )
-                    {
-                        line.lineEnd = line.lineStart;
-                        line.lineStart = start;
-                        line.lastRenderPosition = start - 1;
-                        RenderLine(markdown_, line, textRegion, mdConfig_);
-                        line.lineStart          = line.lineEnd;
-                        line.lastRenderPosition = line.lineStart - 1;
-                    }
+                    em.text.stop = i;
+	                continue;
                 }
+				em.state = Emphasis::NONE;
+				// render text up to here
+				int start = em.text.start - line.emphasisCount;
+				if( start < line.lineStart )
+				{
+					line.lineEnd = line.lineStart;
+					line.lineStart = start;
+					line.lastRenderPosition = start - 1;
+					RenderLine(markdown_, line, textRegion, mdConfig_);
+					line.lineStart          = line.lineEnd;
+					line.lastRenderPosition = line.lineStart - 1;
+				}
 				break;
 			}
+
+            switch (code.state)
+            {
+				case Code::NONE:
+                if (!line.isHeading && link.state == Link::NO_LINK && em.state == Emphasis::NONE)
+                {
+                    int next = i + 1;
+                    if ((c == '<' || c == '&') && static_cast<int>(markdownLength_) > next)
+                    {
+                        code.state = Code::START;
+                        code.sym = c;
+                        code.block.start = i;
+                        continue;
+                    }
+                }
+                break;
+
+				case Code::START:
+                    code.state = Code::TEXT;
+					break;
+
+                case Code::TEXT:
+                if (code.sym == '&' && c == ';')
+                {
+                    line.lastRenderPosition = i;
+                    code = Code();
+                }
+                break;
+
+                default: break;
+            }
 
             // handle end of line (render)
             if( c == '\n' )
             {
                 // first check if the line is a horizontal rule
-                line.lineEnd = i;
-                if( em.state == Emphasis::MIDDLE && line.emphasisCount >=3 &&
+                const int target_line_end = code.state == Code::TEXT ? code.block.start : i;
+
+                line.lineEnd = target_line_end;
+
+				if( em.state == Emphasis::MIDDLE && line.emphasisCount >=3 &&
                     ( line.lineStart + line.emphasisCount ) == i )
                 {
                     ImGui::Separator();
@@ -798,15 +1024,21 @@ namespace ImGui
 
                 // reset the line and emphasis state
 				line = Line();
-                em = Emphasis();
+                if (!em.context.is_valid())
+                {
+                    em = Emphasis();
+                }
 
-                line.lineStart = i + 1;
-                line.lastRenderPosition = i;
+                line.lineStart = target_line_end + 1;
+                line.lastRenderPosition = target_line_end;
 
                 textRegion.ResetIndent();
                 
                 // reset the link
                 link = Link();
+
+                // reset the code
+                code = Code();
             }
         }
 

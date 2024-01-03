@@ -71,30 +71,7 @@ void ida_gens_helper_window::draw_current_node()
 
 void ida_gens_helper_window::draw_layout()
 {
-    if (ImGui::Begin("Example: Simple layout", nullptr, ImGuiWindowFlags_MenuBar))
-    {
-        if (ImGui::BeginMenuBar())
-        {
-            if (ImGui::BeginMenu("File"))
-            {
-                if (ImGui::MenuItem("Close", "Ctrl+W"))
-                {
-	                
-                }
-                ImGui::EndMenu();
-            }
-            ImGui::EndMenuBar();
-        }
-
-        auto& io = ImGui::GetIO();
-
-        ImGui::Text("FPS: %.2f (%.2gms)", io.Framerate, io.Framerate ? 1000.0f / io.Framerate : 0.0f);
-
-        ImGui::Separator();
-
-        draw_current_command();
-    }
-    ImGui::End();
+    draw_current_command();
 }
 
 struct ImGui_ImplSDLRenderer2_Data
@@ -195,15 +172,9 @@ bool ida_gens_helper_window::init_sdl()
         return false;
     }
 
-    // SDL_RenderSetScale(renderer, 1.5f, 1.5f);
-
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
-
-    // ImGui::GetFont()->Font
-
-    // SDL_SetTextureScaleMode(bd->FontTexture, SDL_ScaleModeNearest);
 
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
@@ -238,21 +209,21 @@ void ida_gens_helper_window::draw_current_command()
     size_t markdown_data_size = 0;
     const assembler_documentation_provider::loading_e state = documentation_provider.try_to_get_instruction_description(ea, markdown_data, markdown_data_size);
 
-    // ImGui::Begin("Current Operation");
-    if (state == assembler_documentation_provider::loading_e::success && markdown_data_size > 0)
+    ImGui::Begin("Current Operation");
     {
-        assembler_markdown.draw(markdown_data, markdown_data_size);
-    }
-    else
-    {
-        ImGui::Text("Loading...");
-    }
-    // ImGui::End();
+    	auto& io = ImGui::GetIO();
+	    ImGui::Text("FPS: %.2f (%.2gms)", io.Framerate, io.Framerate ? 1000.0f / io.Framerate : 0.0f);
 
-    //const std::string& func_text = documentation_provider.get_function_description(ea).str();
-    //function_editor.SetText(func_text);
-
-    //function_editor.Render("Current Function");
+        if (state == assembler_documentation_provider::loading_e::success && markdown_data_size > 0)
+        {
+            assembler_markdown.draw(markdown_data, markdown_data_size);
+        }
+        else
+        {
+            ImGui::Text("Loading...");
+        }
+    }
+    ImGui::End();
 
     ImGui::GetFont()->Scale = previous_font_scale;
     ImGui::PopFont();
