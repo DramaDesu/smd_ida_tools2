@@ -265,7 +265,7 @@ void ida_gens_helper_window::try_to_open_tutorial(const std::string& in_mnemonic
 
     bool found_any = false;
 
-    for (auto it = tutorials.find(in_mnemonic_name); it != tutorials.cend(); ++it)
+    for (auto it = tutorials.lower_bound(in_mnemonic_name); it != tutorials.upper_bound(in_mnemonic_name); ++it)
     {
         ShellExecute(0, 0, it->second.c_str(), 0, 0, SW_SHOW);
         found_any = true;
