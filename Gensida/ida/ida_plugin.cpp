@@ -1915,6 +1915,26 @@ struct smd_constant_action_t : public action_handler_t
   }
 };
 
+struct smd_xref_action_t : action_handler_t
+{
+	int idaapi activate(action_activation_ctx_t* ctx) override
+    {
+        const ea_t ea = get_screen_ea();
+        if (!is_mapped(ea)) // address belongs to disassembly
+        {
+            return 1;
+        }
+
+        open_xrefs_window(ea);
+	    return 1;
+    }
+
+	action_state_t idaapi update(action_update_ctx_t* ctx) override
+    {
+        return AST_ENABLE_ALWAYS;
+    }
+};
+
 struct smd_output_mark_action_t : public action_handler_t
 {
   static int idaapi clear_current(int button_code, form_actions_t& fa)
@@ -1996,10 +2016,13 @@ struct smd_output_mark_action_t : public action_handler_t
 };
 
 static const char smd_constant_name[] = "gensida:smd_constant";
+static const char smd_xref_name[] = "gensida:smd_xref";
 static const char smd_output_mark_name[] = "gensida:output_mark";
 static smd_constant_action_t smd_constant;
+static smd_xref_action_t smd_xref;
 static smd_output_mark_action_t smd_output_mark;
 static action_desc_t smd_constant_action = ACTION_DESC_LITERAL(smd_constant_name, "Identify SMD constant", &smd_constant, "J", NULL, -1);
+static action_desc_t smd_xref_action = ACTION_DESC_LITERAL(smd_xref_name, "Show XRefs", &smd_xref, "Shift+X", NULL, -1);
 static action_desc_t smd_output_mark_action = ACTION_DESC_LITERAL(smd_output_mark_name, "Mark ASM output", &smd_output_mark, "Shift+J", NULL, -1);
 
 //--------------------------------------------------------------------------
@@ -2035,6 +2058,7 @@ static plugmod_t* idaapi init(void)
 #ifdef DEBUG_68K
     bool res = register_action(smd_constant_action);
     res = register_action(smd_output_mark_action);
+    res = register_action(smd_xref_action);
 
     hook_to_notification_point(HT_UI, hook_ui, NULL);
     hook_to_notification_point(HT_IDP, hook_disasm, nullptr);

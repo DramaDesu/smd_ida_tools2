@@ -24,9 +24,22 @@ struct assembler_documentation_provider
 		success
 	};
 
+	struct instruction_description_t
+	{
+		const char* data = nullptr;
+		size_t size = 0;
+
+		bool is_valid_data() const
+		{
+			return data != nullptr && size > 0;
+		}
+
+		std::string mnemonic_name;
+	};
+
 	std::string get_mnemonic_description(const insn_t& in_instruction) const;
 
-	loading_e try_to_get_instruction_description(const ea_t in_ea, const char*& out_data, size_t& out_data_size);
+	loading_e try_to_get_instruction_description(const ea_t in_ea, instruction_description_t& out_description);
 
 	std::stringstream get_function_description(const ea_t in_ea);
 

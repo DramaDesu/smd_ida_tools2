@@ -128,7 +128,20 @@ void cleanup_markdown_data(std::string& out_data)
 	}
 }
 
-assembler_documentation_provider::loading_e assembler_documentation_provider::try_to_get_instruction_description(const ea_t in_ea, const char*& out_data, size_t& out_data_size)
+void alias_mnemonic_name(std::string& out_mnemonic_name)
+{
+	const static std::unordered_map<std::string, std::string> aliases = {
+		{"st", "scc"}
+	};
+
+	const auto result = aliases.find(out_mnemonic_name);
+	if (result != aliases.cend())
+	{
+		out_mnemonic_name = result->second;
+	}
+}
+
+assembler_documentation_provider::loading_e assembler_documentation_provider::try_to_get_instruction_description(const ea_t in_ea, instruction_description_t& out_description)
 {
 	if (!is_mapped(in_ea))
 	{
@@ -148,14 +161,16 @@ assembler_documentation_provider::loading_e assembler_documentation_provider::tr
 	}
 
 	const uint32 mnemonic_id = insn->id;
-	const std::string mnemonic_name = cs_insn_name(cs_handle, mnemonic_id);
+	std::string mnemonic_name = cs_insn_name(cs_handle, mnemonic_id);
+	out_description.mnemonic_name = mnemonic_name;
+	alias_mnemonic_name(mnemonic_name);
 
 	cs_free(insn, code_size);
 
 	const auto& loading_state_ptr = instructions_states.find(mnemonic_id);
 	if (loading_state_ptr == instructions_states.cend())
 	{
-		cpr::Url url{ base_instructions_url + mnemonic_name + ".md"};
+		const cpr::Url url{ base_instructions_url + mnemonic_name + ".md"};
 
 		instructions_states.insert_or_assign(mnemonic_id, loading_e::loading);
 		instructions_async_states.insert_or_assign(mnemonic_id, cpr::GetAsync(url));
@@ -180,8 +195,8 @@ assembler_documentation_provider::loading_e assembler_documentation_provider::tr
 
 	if (loading_state_ptr->second == loading_e::success)
 	{
-		out_data = instructions_data.find(mnemonic_id)->second.c_str();
-		out_data_size = instructions_data.find(mnemonic_id)->second.size();
+		out_description.data = instructions_data.find(mnemonic_id)->second.c_str();
+		out_description.size = instructions_data.find(mnemonic_id)->second.size();
 	}
 
 	return loading_state_ptr->second;
@@ -213,11 +228,6 @@ std::stringstream assembler_documentation_provider::get_function_description(con
 
 		insn_t out_insn;
 		decode_insn(&out_insn, current_operation);
-
-		const std::string& out_operation_text = parse_operation(out_insn, processed_operations);
-
-
-
 		processed_operations.insert(current_operation);
 	}
 

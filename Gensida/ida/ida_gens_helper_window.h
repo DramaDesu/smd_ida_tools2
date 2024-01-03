@@ -9,14 +9,6 @@
 #include "helper_window/assembler_markdown.h"
 #include "helper_window/text_editor.h"
 
-namespace ax
-{
-	namespace NodeEditor
-	{
-		struct EditorContext;
-	}
-}
-
 struct ida_gens_helper_window
 {
 	void init();
@@ -30,8 +22,9 @@ private:
 	void shutdown_sdl() const;
 
 	void draw_layout();
-	void draw_current_node();
     void draw_current_command();
+
+	void try_to_open_tutorial(const std::string& in_mnemonic_name) const;
 
 	std::thread gens_helper_thread;
 
@@ -44,8 +37,6 @@ private:
 
 	struct SDL_Window* window = nullptr;
 	struct SDL_Renderer* renderer = nullptr;
-
-	struct ax::NodeEditor::EditorContext* editor_context = nullptr;
 
 	TextEditor function_editor;
 

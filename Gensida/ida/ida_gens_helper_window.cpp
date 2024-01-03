@@ -2,6 +2,9 @@
 
 #include "ida_gens_helper_window.h"
 
+#include "helper_window/assembler_documentation_provider.h"
+#include "helper_window/assembler_documentation_provider.h"
+
 #ifdef SUPPORT_VISUALIZATION
 
 #include <bytes.hpp>
@@ -17,6 +20,9 @@
 #include <SDL2/SDL_render.h>
 #include <SDL2/SDL_timer.h>
 #include <SDL2/SDL_video.h>
+
+#include <windows.h>
+#include <shellapi.h>
 
 #include "helper_window/text_editor.h"
 
@@ -37,36 +43,6 @@ void ida_gens_helper_window::shutdown()
 
 	should_stop_visualization = true;
 	gens_helper_thread.join();
-}
-
-void ida_gens_helper_window::draw_current_node()
-{
-    ImGui::Begin("Content");
-
-    auto& io = ImGui::GetIO();
-
-    ImGui::Text("FPS: %.2f (%.2gms)", io.Framerate, io.Framerate ? 1000.0f / io.Framerate : 0.0f);
-
-    ImGui::Separator();
-
-    ax::NodeEditor::SetCurrentEditor(editor_context);
-    ax::NodeEditor::Begin("My Editor", ImVec2(0.0, 0.0f));
-    int uniqueId = 1;
-    // Start drawing nodes.
-    ax::NodeEditor::BeginNode(uniqueId++);
-    ImGui::Text("Node A");
-    ax::NodeEditor::BeginPin(uniqueId++, ax::NodeEditor::PinKind::Input);
-    ImGui::Text("-> In");
-    ax::NodeEditor::EndPin();
-    ImGui::SameLine();
-    ax::NodeEditor::BeginPin(uniqueId++, ax::NodeEditor::PinKind::Output);
-    ImGui::Text("Out ->");
-    ax::NodeEditor::EndPin();
-    ax::NodeEditor::EndNode();
-    ax::NodeEditor::End();
-    ax::NodeEditor::SetCurrentEditor(nullptr);
-
-    ImGui::End();
 }
 
 void ida_gens_helper_window::draw_layout()
@@ -98,10 +74,6 @@ void ida_gens_helper_window::process()
     {
 	    return;
     }
-
-    ax::NodeEditor::Config config;
-    config.SettingsFile = "Simple.json";
-    editor_context = ax::NodeEditor::CreateEditor(&config);
 
     make_font_pixel_perfect();
 
@@ -139,8 +111,6 @@ void ida_gens_helper_window::process()
 
         SDL_Delay(_60fps);
     }
-
-    ax::NodeEditor::DestroyEditor(editor_context);
 
     documentation_provider.shutdown();
 
@@ -205,28 +175,106 @@ void ida_gens_helper_window::draw_current_command()
 
     const ea_t ea = get_screen_ea();
 
-    const char* markdown_data = nullptr;
-    size_t markdown_data_size = 0;
-    const assembler_documentation_provider::loading_e state = documentation_provider.try_to_get_instruction_description(ea, markdown_data, markdown_data_size);
+    assembler_documentation_provider::instruction_description_t out_description;
+    const assembler_documentation_provider::loading_e state = documentation_provider.try_to_get_instruction_description(ea, out_description);
 
     ImGui::Begin("Current Operation");
     {
     	auto& io = ImGui::GetIO();
 	    ImGui::Text("FPS: %.2f (%.2gms)", io.Framerate, io.Framerate ? 1000.0f / io.Framerate : 0.0f);
 
-        if (state == assembler_documentation_provider::loading_e::success && markdown_data_size > 0)
+        if (!out_description.mnemonic_name.empty() && ImGui::Button(out_description.mnemonic_name.c_str()))
         {
-            assembler_markdown.draw(markdown_data, markdown_data_size);
+            try_to_open_tutorial(out_description.mnemonic_name);
+        }
+
+        if (ImGui::BeginPopupModal("no_tutorial_popup")) 
+        {
+            ImGui::Text("No tutorial found for %s", out_description.mnemonic_name.c_str());
+            if (ImGui::Button("Okay") || ImGui::IsKeyPressed(ImGuiKey_Enter))
+            {
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::EndPopup();
+        }
+
+        if (state == assembler_documentation_provider::loading_e::success && out_description.is_valid_data())
+        {
+	        assembler_markdown.draw(out_description.data, out_description.size);
         }
         else
         {
-            ImGui::Text("Loading...");
+	        ImGui::Text("Loading...");
         }
     }
     ImGui::End();
 
     ImGui::GetFont()->Scale = previous_font_scale;
     ImGui::PopFont();
+}
+
+void ida_gens_helper_window::try_to_open_tutorial(const std::string& in_mnemonic_name) const
+{
+	static const std::multimap<std::string, std::string> tutorials = {
+        { "move", "https://mrjester.hapisan.com/04_MC68/Sect01Part05/Index.html" },
+
+        { "add", "https://mrjester.hapisan.com/04_MC68/Sect02Part01/Index.html" },
+        { "sub", "https://mrjester.hapisan.com/04_MC68/Sect02Part02/Index.html" },
+        { "swap", "https://mrjester.hapisan.com/04_MC68/Sect02Part03/Index.html" },
+        { "exg", "https://mrjester.hapisan.com/04_MC68/Sect02Part04/Index.html" },
+        { "clr", "https://mrjester.hapisan.com/04_MC68/Sect02Part05/Index.html" },
+
+        { "not", "https://mrjester.hapisan.com/04_MC68/Sect03Part01/Index.html" },
+        { "and", "https://mrjester.hapisan.com/04_MC68/Sect03Part02/Index.html" },
+        { "or", "https://mrjester.hapisan.com/04_MC68/Sect03Part03/Index.html" },
+        { "eor", "https://mrjester.hapisan.com/04_MC68/Sect03Part04/Index.html" },
+        { "eori", "https://mrjester.hapisan.com/04_MC68/Sect03Part04/Index.html" },
+        { "bset", "https://mrjester.hapisan.com/04_MC68/Sect03Part05/Index.html" },
+        { "bclr", "https://mrjester.hapisan.com/04_MC68/Sect03Part05/Index.html" },
+        { "bchg", "https://mrjester.hapisan.com/04_MC68/Sect03Part05/Index.html" },
+
+        { "neg", "https://mrjester.hapisan.com/04_MC68/Sect04Part03/Index.html" },
+        { "ext", "https://mrjester.hapisan.com/04_MC68/Sect04Part04/Index.html" },
+        { "lsl", "https://mrjester.hapisan.com/04_MC68/Sect04Part06/Index.html" },
+        { "asl", "https://mrjester.hapisan.com/04_MC68/Sect04Part06/Index.html" },
+        { "asr", "https://mrjester.hapisan.com/04_MC68/Sect04Part06/Index.html" },
+        { "rol", "https://mrjester.hapisan.com/04_MC68/Sect04Part07/Index.html" },
+        { "ror", "https://mrjester.hapisan.com/04_MC68/Sect04Part07/Index.html" },
+        { "mulu", "https://mrjester.hapisan.com/04_MC68/Sect04Part08/Index.html" },
+        { "muls", "https://mrjester.hapisan.com/04_MC68/Sect04Part08/Index.html" },
+        { "divu", "https://mrjester.hapisan.com/04_MC68/Sect04Part09/Index.html" },
+        { "divs", "https://mrjester.hapisan.com/04_MC68/Sect04Part09/Index.html" },
+
+        { "jmp", "https://mrjester.hapisan.com/04_MC68/Sect05Part02/Index.html" },
+        { "bra", "https://mrjester.hapisan.com/04_MC68/Sect05Part03/Index.html" },
+        { "jsr", "https://mrjester.hapisan.com/04_MC68/Sect05Part05/Index.html" },
+        { "rts", "https://mrjester.hapisan.com/04_MC68/Sect05Part05/Index.html" },
+        { "bsr", "https://mrjester.hapisan.com/04_MC68/Sect05Part06/Index.html" },
+
+        { "cmp", "https://mrjester.hapisan.com/04_MC68/Sect06Part01/Index.html" },
+        { "addi", "https://mrjester.hapisan.com/04_MC68/Sect06Part01/Index.html" },
+        { "subi", "https://mrjester.hapisan.com/04_MC68/Sect06Part01/Index.html" },
+        { "cmp", "https://mrjester.hapisan.com/04_MC68/Sect06Part02/Index.html" },
+        { "tst", "https://mrjester.hapisan.com/04_MC68/Sect06Part02/Index.html" },
+        { "cmpi", "https://mrjester.hapisan.com/04_MC68/Sect06Part02/Index.html" },
+        { "btst", "https://mrjester.hapisan.com/04_MC68/Sect06Part02/Index.html" },
+
+        { "beq", "https://mrjester.hapisan.com/04_MC68/Sect06Part01/Index.html" },
+        { "beq", "https://mrjester.hapisan.com/04_MC68/Sect06Part02/Index.html" },
+	};
+
+    bool found_any = false;
+
+    for (auto it = tutorials.find(in_mnemonic_name); it != tutorials.cend(); ++it)
+    {
+        ShellExecute(0, 0, it->second.c_str(), 0, 0, SW_SHOW);
+        found_any = true;
+    }
+
+    if (!found_any)
+    {
+        ImGui::OpenPopup("no_tutorial_popup");
+    }
 }
 
 #endif
