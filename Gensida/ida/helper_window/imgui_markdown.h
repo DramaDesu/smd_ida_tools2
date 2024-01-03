@@ -328,7 +328,8 @@ namespace ImGui
         MarkdownImageCallback*  imageCallback = NULL;
         const char*             linkIcon = "";                      // icon displayd in link tooltip
         MarkdownHeadingFormat   headingFormats[ NUMHEADINGS ] = { { NULL, true }, { NULL, true }, { NULL, true } };
-        void*                   userData = NULL;        
+        void*                   userData = NULL;
+        bool                    ignore_links = false;
         MarkdownFormalCallback* formatCallback = defaultMarkdownFormatCallback;
     };
 
@@ -754,94 +755,97 @@ namespace ImGui
                 }
             }
 
-            // Test to see if we have a link
-            switch( link.state )
+            if (!mdConfig_.ignore_links)
             {
-            case Link::NO_LINK:
-                if( c == '[' && !line.isHeading ) // we do not support headings with links for now
+                // Test to see if we have a link
+                switch (link.state)
                 {
-                    link.state = Link::HAS_SQUARE_BRACKET_OPEN;
-                    link.text.start = i + 1;
-                    if( i > 0 && markdown_[i - 1] == '!' )
+                case Link::NO_LINK:
+                    if (c == '[' && !line.isHeading) // we do not support headings with links for now
                     {
-                        link.isImage = true;
-                    }
-                }
-                break;
-            case Link::HAS_SQUARE_BRACKET_OPEN:
-                if( c == ']' )
-                {
-                    link.state = Link::HAS_SQUARE_BRACKETS;
-                    link.text.stop = i;
-                }
-                break;
-            case Link::HAS_SQUARE_BRACKETS:
-                if( c == '(' )
-                {
-                    link.state = Link::HAS_SQUARE_BRACKETS_ROUND_BRACKET_OPEN;
-                    link.url.start = i + 1;
-                    link.num_brackets_open = 1;
-                }
-                break;
-            case Link::HAS_SQUARE_BRACKETS_ROUND_BRACKET_OPEN:
-                if( c == '(' )
-                {
-                    ++link.num_brackets_open;
-                }
-                else if( c == ')' )
-                {
-                    --link.num_brackets_open;
-                }
-                if( link.num_brackets_open == 0 )
-                {
-                    // reset emphasis status, we do not support emphasis around links for now
-                    em = Emphasis();
-                    // render previous line content
-                    line.lineEnd = link.text.start - ( link.isImage ? 2 : 1 );
-                    RenderLine( markdown_, line, textRegion, mdConfig_ );
-                    line.leadSpaceCount = 0;
-                    link.url.stop = i;
-                    line.isUnorderedListStart = false;    // the following text shouldn't have bullets
-                    ImGui::SameLine( 0.0f, 0.0f );
-                    if( link.isImage )   // it's an image, render it.
-                    {
-                        bool drawnImage = false;
-                        bool useLinkCallback = false;
-                        if( mdConfig_.imageCallback )
+                        link.state = Link::HAS_SQUARE_BRACKET_OPEN;
+                        link.text.start = i + 1;
+                        if (i > 0 && markdown_[i - 1] == '!')
                         {
-                            MarkdownImageData imageData = mdConfig_.imageCallback( { markdown_ + link.text.start, link.text.size(), markdown_ + link.url.start, link.url.size(), mdConfig_.userData, true } );
-                            useLinkCallback = imageData.useLinkCallback;
-                            if( imageData.isValid )
-                            {
-                                ImGui::Image( imageData.user_texture_id, imageData.size, imageData.uv0, imageData.uv1, imageData.tint_col, imageData.border_col );
-                                drawnImage = true;
-                            }
-                        }
-                        if( !drawnImage )
-                        {
-                            ImGui::Text( "( Image %.*s not loaded )", link.url.size(), markdown_ + link.url.start );
-                        }
-                        if( ImGui::IsItemHovered() )
-                        {
-                            if( ImGui::IsMouseReleased( 0 ) && mdConfig_.linkCallback && useLinkCallback )
-                            {
-                                mdConfig_.linkCallback( { markdown_ + link.text.start, link.text.size(), markdown_ + link.url.start, link.url.size(), mdConfig_.userData, true } );
-                            }
-                            if( link.text.size() > 0 && mdConfig_.tooltipCallback )
-                            {
-                                mdConfig_.tooltipCallback( { { markdown_ + link.text.start, link.text.size(), markdown_ + link.url.start, link.url.size(), mdConfig_.userData, true }, mdConfig_.linkIcon } );
-                            }
+                            link.isImage = true;
                         }
                     }
-                    else                 // it's a link, render it.
-                    {
-                        textRegion.RenderLinkTextWrapped( markdown_ + link.text.start, markdown_ + link.text.start + link.text.size(), link, markdown_, mdConfig_, &linkHoverStart, false );
-                    }
-                    ImGui::SameLine( 0.0f, 0.0f );
-                    // reset the link by reinitializing it
-                    link = Link();
-                    line.lastRenderPosition = i;
                     break;
+                case Link::HAS_SQUARE_BRACKET_OPEN:
+                    if (c == ']')
+                    {
+                        link.state = Link::HAS_SQUARE_BRACKETS;
+                        link.text.stop = i;
+                    }
+                    break;
+                case Link::HAS_SQUARE_BRACKETS:
+                    if (c == '(')
+                    {
+                        link.state = Link::HAS_SQUARE_BRACKETS_ROUND_BRACKET_OPEN;
+                        link.url.start = i + 1;
+                        link.num_brackets_open = 1;
+                    }
+                    break;
+                case Link::HAS_SQUARE_BRACKETS_ROUND_BRACKET_OPEN:
+                    if (c == '(')
+                    {
+                        ++link.num_brackets_open;
+                    }
+                    else if (c == ')')
+                    {
+                        --link.num_brackets_open;
+                    }
+                    if (link.num_brackets_open == 0)
+                    {
+                        // reset emphasis status, we do not support emphasis around links for now
+                        em = Emphasis();
+                        // render previous line content
+                        line.lineEnd = link.text.start - (link.isImage ? 2 : 1);
+                        RenderLine(markdown_, line, textRegion, mdConfig_);
+                        line.leadSpaceCount = 0;
+                        link.url.stop = i;
+                        line.isUnorderedListStart = false;    // the following text shouldn't have bullets
+                        ImGui::SameLine(0.0f, 0.0f);
+                        if (link.isImage)   // it's an image, render it.
+                        {
+                            bool drawnImage = false;
+                            bool useLinkCallback = false;
+                            if (mdConfig_.imageCallback)
+                            {
+                                MarkdownImageData imageData = mdConfig_.imageCallback({ markdown_ + link.text.start, link.text.size(), markdown_ + link.url.start, link.url.size(), mdConfig_.userData, true });
+                                useLinkCallback = imageData.useLinkCallback;
+                                if (imageData.isValid)
+                                {
+                                    ImGui::Image(imageData.user_texture_id, imageData.size, imageData.uv0, imageData.uv1, imageData.tint_col, imageData.border_col);
+                                    drawnImage = true;
+                                }
+                            }
+                            if (!drawnImage)
+                            {
+                                ImGui::Text("( Image %.*s not loaded )", link.url.size(), markdown_ + link.url.start);
+                            }
+                            if (ImGui::IsItemHovered())
+                            {
+                                if (ImGui::IsMouseReleased(0) && mdConfig_.linkCallback && useLinkCallback)
+                                {
+                                    mdConfig_.linkCallback({ markdown_ + link.text.start, link.text.size(), markdown_ + link.url.start, link.url.size(), mdConfig_.userData, true });
+                                }
+                                if (link.text.size() > 0 && mdConfig_.tooltipCallback)
+                                {
+                                    mdConfig_.tooltipCallback({ { markdown_ + link.text.start, link.text.size(), markdown_ + link.url.start, link.url.size(), mdConfig_.userData, true }, mdConfig_.linkIcon });
+                                }
+                            }
+                        }
+                        else                 // it's a link, render it.
+                        {
+                            textRegion.RenderLinkTextWrapped(markdown_ + link.text.start, markdown_ + link.text.start + link.text.size(), link, markdown_, mdConfig_, &linkHoverStart, false);
+                        }
+                        ImGui::SameLine(0.0f, 0.0f);
+                        // reset the link by reinitializing it
+                        link = Link();
+                        line.lastRenderPosition = i;
+                        break;
+                    }
                 }
             }
 

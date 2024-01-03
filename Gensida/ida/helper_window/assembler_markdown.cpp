@@ -12,6 +12,7 @@ inline void assembler_markdown_format_callback(const ImGui::MarkdownFormatInfo& 
 ui::assembler_markdown::assembler_markdown()
 {
 	md_config.userData = this;
+	md_config.ignore_links = true;
 	md_config.formatCallback = assembler_markdown_format_callback;
 }
 
@@ -112,7 +113,7 @@ inline void assembler_markdown_format_callback(const ImGui::MarkdownFormatInfo& 
 
 			constexpr float scale_coef = 1.5f;
 
-			const float scale = scale_coef / in_markdown_info.level + 0.5f;
+			const float scale = scale_coef / static_cast<float>(in_markdown_info.level) + 0.5f;
 
 			if (in_markdown_info.level > ImGui::MarkdownConfig::NUMHEADINGS)
 			{
