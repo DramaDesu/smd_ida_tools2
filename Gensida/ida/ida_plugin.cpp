@@ -1208,6 +1208,7 @@ struct m68k_events_visitor_t : public post_event_visitor_t
         } break;
         case o_phrase:
         case o_reg:
+
         {
           int reg_idx = idp_to_dbg_reg(op.reg);
           regval_t reg = getreg(dbg->regs(reg_idx).name, regvalues);

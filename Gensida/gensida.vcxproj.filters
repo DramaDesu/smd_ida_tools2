@@ -48,6 +48,9 @@
     <ClCompile Include="ida\helper_window\assembler_markdown.cpp">
       <Filter>ida\helper_window</Filter>
     </ClCompile>
+    <ClCompile Include="ida\helper_window\textselect.cpp">
+      <Filter>ida\helper_window</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ida\ida_debmod.h">
@@ -88,6 +91,9 @@
       <Filter>ida\helper_window</Filter>
     </ClInclude>
     <ClInclude Include="ida\helper_window\assembler_markdown.h">
+      <Filter>ida\helper_window</Filter>
+    </ClInclude>
+    <ClInclude Include="ida\helper_window\textselect.hpp">
       <Filter>ida\helper_window</Filter>
     </ClInclude>
   </ItemGroup>

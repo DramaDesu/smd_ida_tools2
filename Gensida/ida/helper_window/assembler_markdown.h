@@ -8,9 +8,11 @@ namespace ui
 	{
 		assembler_markdown();
 
-		void draw(const char* in_data, size_t in_data_size) const;
+		void draw(const char* in_data, size_t in_data_size);
 
 	private:
+		const char* data = nullptr;
+
 		ImGui::MarkdownConfig md_config;
 	};
 }

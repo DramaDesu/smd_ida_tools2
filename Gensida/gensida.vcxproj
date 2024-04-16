@@ -205,6 +205,8 @@
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <MinimalRebuild>false</MinimalRebuild>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard_C>Default</LanguageStandard_C>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -393,6 +395,7 @@
     </ClCompile>
     <ClCompile Include="ida\helper_window\assembler_documentation_provider.cpp" />
     <ClCompile Include="ida\helper_window\assembler_markdown.cpp" />
+    <ClCompile Include="ida\helper_window\textselect.cpp" />
     <ClCompile Include="ida\helper_window\text_editor.cpp" />
     <ClCompile Include="ida\ida_debug.cpp" />
     <ClCompile Include="ida\ida_gens_helper_window.cpp" />
@@ -426,6 +429,7 @@
     <ClInclude Include="ida\helper_window\assembler_documentation_provider.h" />
     <ClInclude Include="ida\helper_window\assembler_markdown.h" />
     <ClInclude Include="ida\helper_window\imgui_markdown.h" />
+    <ClInclude Include="ida\helper_window\textselect.hpp" />
     <ClInclude Include="ida\helper_window\text_editor.h" />
     <ClInclude Include="ida\ida_debmod.h" />
     <ClInclude Include="ida\ida_debug.h" />

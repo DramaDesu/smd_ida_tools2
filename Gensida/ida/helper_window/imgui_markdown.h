@@ -531,64 +531,66 @@ namespace ImGui
 
 	    const MarkdownLineInfo line_info(markdown_, line_, textRegion_, mdConfig_);
 
-        for (int i = 0; i < code_size; i++)
-        {
-            const char c = text_start[i];
-			const bool is_eof = i == code_size - 1;
+        RenderLine(markdown_, line_, textRegion_, mdConfig_);
 
-            const int target_render_position = code_start_position + i;
+   //     for (int i = 0; i < code_size; i++)
+   //     {
+   //         const char c = text_start[i];
+			//const bool is_eof = i == code_size - 1;
 
-            if (c == ' ' || c == ',' || c == '\n' || is_eof)
-            {
-                if (c == '\n')
-                {
-                    should_same_line = false;
-                }
+   //         const int target_render_position = code_start_position + i;
 
-	            line_.lastRenderPosition = current_render_position;
-                line_.lineEnd = target_render_position;
-                if (is_eof)
-                {
-                    line_.lineEnd++;
-                }/**/
-                RenderLine(line_info);
-                if (should_same_line)
-                {
-                    ImGui::SameLine();
-                }
-                else
-                {
-                    should_same_line = true;
-                }
+   //         if (c == ' ' || c == ',' || c == '\n' || is_eof)
+   //         {
+   //             if (c == '\n')
+   //             {
+   //                 should_same_line = false;
+   //             }
 
-                if (c == '\n')
-                {
-                    line_.isComment = false;
-                }
+	  //          line_.lastRenderPosition = current_render_position;
+   //             line_.lineEnd = target_render_position;
+   //             if (is_eof)
+   //             {
+   //                 line_.lineEnd++;
+   //             }/**/
+   //             RenderLine(line_info);
+   //             if (should_same_line)
+   //             {
+   //                 ImGui::SameLine();
+   //             }
+   //             else
+   //             {
+   //                 should_same_line = true;
+   //             }
 
-                if (c == ',' || (!opened_var && c == ' '))
-                {
-                    line_.lastRenderPosition = target_render_position - 1;
-                    line_.lineEnd = target_render_position + 1;
-                    RenderLine(markdown_, line_, textRegion_, mdConfig_);
-                    ImGui::SameLine();
-                }
+   //             if (c == '\n')
+   //             {
+   //                 line_.isComment = false;
+   //             }
 
-                current_render_position = target_render_position;
-            }
-            else if (!opened_var && c == '<')
-            {
-                opened_var = true;
-            }
-            else if (opened_var && c == '>')
-            {
-	            opened_var = false;
-            }
-            else if (c == ';')
-            {
-                line_.isComment = true;
-            }
-        }
+   //             if (c == ',' || (!opened_var && c == ' '))
+   //             {
+   //                 line_.lastRenderPosition = target_render_position - 1;
+   //                 line_.lineEnd = target_render_position + 1;
+   //                 RenderLine(markdown_, line_, textRegion_, mdConfig_);
+   //                 ImGui::SameLine();
+   //             }
+
+   //             current_render_position = target_render_position;
+   //         }
+   //         else if (!opened_var && c == '<')
+   //         {
+   //             opened_var = true;
+   //         }
+   //         else if (opened_var && c == '>')
+   //         {
+	  //          opened_var = false;
+   //         }
+   //         else if (c == ';')
+   //         {
+   //             line_.isComment = true;
+   //         }
+   //     }
         ImGui::Unindent();
     }
 

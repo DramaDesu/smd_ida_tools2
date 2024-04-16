@@ -5,9 +5,28 @@
 #include <array>
 #include <vector>
 
+#include "textselect.hpp"
+
 using namespace std::string_literals;
 
 inline void assembler_markdown_format_callback(const ImGui::MarkdownFormatInfo& in_markdown_info, bool in_start);
+
+std::vector<std::string> lines{
+	"Line 1\n",
+	"Line 2\n",
+	"Line 3\n",
+	"A longer line\n",
+	"Text selection in Dear ImGui\n",
+	"UTF-8 characters\n"
+};
+
+std::string_view getLineAtIdx(size_t idx) {
+	return lines[idx];
+}
+
+size_t getNumLines() {
+	return lines.size();
+}
 
 ui::assembler_markdown::assembler_markdown()
 {
@@ -16,9 +35,46 @@ ui::assembler_markdown::assembler_markdown()
 	md_config.formatCallback = assembler_markdown_format_callback;
 }
 
-void ui::assembler_markdown::draw(const char* in_data, size_t in_data_size) const
+void ui::assembler_markdown::draw(const char* in_data, size_t in_data_size)
 {
-	ImGui::Markdown(in_data, in_data_size, md_config);
+	data = in_data;
+
+	TextSelect text_select{ getLineAtIdx, getNumLines };
+
+	//TextSelect text_select{ [&](size_t in_index)
+	//{
+	//	return std::string_view(in_data, in_data_size);
+	//},
+	//	[&]
+	//	{
+	//		return 1;
+	//	}
+	//};
+
+	ImGui::BeginChild("text", { 0, 0 }, 0, ImGuiWindowFlags_NoMove);
+
+	// Display each line
+	for (const auto& line : lines) ImGui::TextUnformatted(line.c_str());
+	// ImGui::TextUnformatted(in_data);
+
+	// Update TextSelect instance (all text selection is handled in this method)
+	text_select.update();
+
+	// Register a context menu (optional)
+	// The TextSelect class provides the hasSelection, copy, and selectAll methods
+	// for manual control.
+	if (ImGui::BeginPopupContextWindow()) {
+		ImGui::BeginDisabled(!text_select.hasSelection());
+		if (ImGui::MenuItem("Copy", "Ctrl+C")) text_select.copy();
+		ImGui::EndDisabled();
+
+		if (ImGui::MenuItem("Select all", "Ctrl+A")) text_select.selectAll();
+		ImGui::EndPopup();
+	}
+
+	ImGui::EndChild();
+
+	// ImGui::Markdown(in_data, in_data_size, md_config);
 }
 
 #define DATA_REGISTER(N) ("D" #N)

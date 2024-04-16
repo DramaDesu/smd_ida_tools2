@@ -236,6 +236,7 @@ void ida_gens_helper_window::try_to_open_tutorial(const std::string& in_mnemonic
         { "neg", "https://mrjester.hapisan.com/04_MC68/Sect04Part03/Index.html" },
         { "ext", "https://mrjester.hapisan.com/04_MC68/Sect04Part04/Index.html" },
         { "lsl", "https://mrjester.hapisan.com/04_MC68/Sect04Part06/Index.html" },
+        { "lsr", "https://mrjester.hapisan.com/04_MC68/Sect04Part06/Index.html" },
         { "asl", "https://mrjester.hapisan.com/04_MC68/Sect04Part06/Index.html" },
         { "asr", "https://mrjester.hapisan.com/04_MC68/Sect04Part06/Index.html" },
         { "rol", "https://mrjester.hapisan.com/04_MC68/Sect04Part07/Index.html" },
